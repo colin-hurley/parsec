@@ -473,13 +473,13 @@ SUB CheckSymVal (type$, initVal$)
 		IF beenError% = 1 THEN CALL PrintError(0, "Invalid file extension, " + ext$ + ", found for the initial value of the symbol on line" + STR$(lineNum%) + ".")
 		IF IsValidName%(fileName$) = 0 THEN CALL PrintError(0, "A symbol on line" + STR$(lineNum%) + " is assigned to a file name that may be invalid.")
 
-	ELSEIF type$ = "cog" OR type$ = "vector" OR type$ = "message" THEN
+	ELSEIF type$ = "vector" OR type$ = "message" THEN
 		CALL PrintError(0, "The symbol of type, " + type$ + ", used on line" + STR$(lineNum%) + " cannot have an initial value.")
 
 	ELSEIF type$ = "flex" OR type$ = "float" THEN
 		IF IsValidFlex%(initVal$) = 0 THEN CALL PrintError(0, "Invalid initial value, " + initVal$ + ", found for the symbol on line" + STR$(lineNum%) + ".")
 
-	ELSEIF type$ = "thing" OR type$ = "sector" OR type$ = "surface" OR type$ = "int" THEN
+	ELSEIF type$ = "cog" OR type$ = "thing" OR type$ = "sector" OR type$ = "surface" OR type$ = "int" THEN
 		IF IsValidInt%(initVal$) = 0 THEN CALL PrintError(0, "Invalid initial value, " + initVal$ + ", for the symbol on line" + STR$(lineNum%) + ".")
 
 	ELSEIF type$ = "template" THEN
