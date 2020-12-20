@@ -1,4 +1,4 @@
-' Parsec 1.7.0 Source Code
+' Parsec 1.8.0 Source Code
 ' written in QuickBasic 7.1.
 '------------------------------------------------------------------------------
 
@@ -542,7 +542,7 @@ SUB CreateAPI
 	'--------------- Print Title Bar --------------------------------------
 
 	COLOR 0, 7
-	PRINT SPACE$(33); "Parsec v1.7.0"; SPACE$(34);
+	PRINT SPACE$(33); "Parsec v1.8.0"; SPACE$(34);
 
 	'--------------- Print main window ------------------------------------
 
