@@ -88,14 +88,16 @@ time1! = TIMER
 REM $DYNAMIC
 
 'Arrays
+' Note: Unfortunately, we cannot be too generous with the memory space
+' allocation; otherwise, code 14 (out of string space) will be thrown.
 DIM SHARED symType$(1 TO 30)
 DIM SHARED symExt$(1 TO 10)
 DIM SHARED message$(1 TO 100)
-DIM SHARED verbName$(1 TO 451)
-DIM SHARED verbAct%(1 TO 451)
-DIM SHARED verbRet$(1 TO 451)
-DIM SHARED verbParNum$(1 TO 451)
-DIM SHARED verbParam$(1 TO 451, 1 TO 10)
+DIM SHARED verbName$(1 TO 601)
+DIM SHARED verbAct%(1 TO 601)
+DIM SHARED verbRet$(1 TO 601)
+DIM SHARED verbParNum$(1 TO 601)
+DIM SHARED verbParam$(1 TO 601, 1 TO 11)
 DIM SHARED varName$(1 TO 200)
 DIM SHARED varConst$(1 TO 200)
 DIM SHARED varType$(1 TO 200)
