@@ -1039,7 +1039,7 @@ SUB DoStatement (codeLine$, x%, blockEnd%, MsgReturn%, which%)
 
 	IF codeWord$ = "if" AND (strictParse% = 0 OR (strictParse% = 1 AND nextChar$ = "(")) THEN
 		CALL DoIf(codeLine$, x%)
-	ELSEIF codeWord$ = "call" THEN
+	ELSEIF codeWord$ = "call" OR codeWord$ = "goto" THEN
 		CALL DoCall(codeLine$, x%)
 		CALL DoSemi(codeLine$, x%)
 	ELSEIF codeWord$ = "do" THEN
