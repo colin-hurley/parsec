@@ -12,10 +12,8 @@
 			Set the appropriate *_HOME environment variables (see profiles) or *.home system
 			properties to override these defaults.
 		-->
-		<!-- DOSBox v0.74 - This is used to run the QuickBASIC compiler -->
-		<dosbox.home>C:\Program Files\DOSBox-0.74</dosbox.home>
-		<!-- Microsoft QuickBASIC Extended v7.1 - This is used to compile the code -->
-		<qb.home>C:\Program Files\qb71</qb.home>
+		<!-- FreeBASIC - This is used to compile the code -->
+		<freebasic.home>C:\Program Files\FreeBASIC-1.05.0-win64</freebasic.home>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -29,24 +27,6 @@
 		</dependencies>
 	</dependencyManagement>
 	<build>
-		<resources>
-			<resource>
-				<directory>src\main\resources</directory>
-				<excludes>
-					<exclude>*.bat</exclude>
-				</excludes>
-			</resource>
-			<resource>
-				<directory>src\main\resources</directory>
-				<filtering>true</filtering>
-				<includes>
-					<include>*.bat</include>
-				</includes>
-			</resource>
-			<resource>
-				<directory>src\main\bas</directory>
-			</resource>
-		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -75,10 +55,17 @@
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<executable>${dosbox.home}\DOSBox.exe</executable>
+							<!-- Invoke the FreeBASIC compiler -->
+							<executable>${freebasic.home}\fbc.exe</executable>
 							<arguments>
-								<argument>-exit</argument>
-								<argument>${project.build.outputDirectory}\build.bat</argument>
+								<!-- Specify input source file -->
+								<argument>${project.basedir}\src\main\bas\parsec.bas</argument>
+								<!-- QuickBASIC compatibility -->
+								<argument>-lang</argument>
+								<argument>qb</argument>
+								<!-- Specify executable output file -->
+								<argument>-x</argument>
+								<argument>${project.build.outputDirectory}\parsec.exe</argument>
 							</arguments>
 						</configuration>
 					</execution>
@@ -110,34 +97,18 @@
 	<profiles>
 		<profile>
 			<!--
-				If the user has set the DOSBOX_HOME environment variable, use it to initialize the
-				dosbox.home property. This allows the user to set the environment variable once instead
+				If the user has set the FREEBASIC_HOME environment variable, use it to initialize the
+				freebasic.home property. This allows the user to set the environment variable once instead
 				of needing to set the system property on the command line for every build.
 			-->
-			<id>env.DOSBOX_HOME-override</id>
+			<id>env.FREEBASIC_HOME-override</id>
 			<activation>
 				<property>
-					<name>env.DOSBOX_HOME</name>
+					<name>env.FREEBASIC_HOME</name>
 				</property>
 			</activation>
 			<properties>
-				<dosbox.home>${env.DOSBOX_HOME}</dosbox.home>
-			</properties>
-		</profile>
-		<profile>
-			<!--
-				If the user has set the QB_HOME environment variable, use it to initialize the
-				qb.home property. This allows the user to set the environment variable once instead
-				of needing to set the system property on the command line for every build.
-			-->
-			<id>env.QB_HOME-override</id>
-			<activation>
-				<property>
-					<name>env.QB_HOME</name>
-				</property>
-			</activation>
-			<properties>
-				<qb.home>${env.QB_HOME}</qb.home>
+				<freebasic.home>${env.FREEBASIC_HOME}</freebasic.home>
 			</properties>
 		</profile>
 	</profiles>

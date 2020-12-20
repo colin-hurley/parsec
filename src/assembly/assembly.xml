@@ -12,18 +12,14 @@
 		<fileSet>
 			<outputDirectory>\</outputDirectory>
 			<directory>${project.basedir}\src\main\resources</directory>
-			<excludes>
-				<exclude>build.bat</exclude>
-			</excludes>
 		</fileSet>
 	</fileSets>
 	<files>
 		<file>
-			<!-- Preserve original filename case (Parsec.exe instead of PARSEC.EXE) -->
-			<!-- This explicit file mapping also causes the build to fail if PARSEC.EXE wasn't built successfully -->
+			<!-- Preserve original filename case (Parsec.exe instead of parsec.exe) -->
 			<outputDirectory>\</outputDirectory>
 			<destName>Parsec.exe</destName>
-			<source>${project.build.outputDirectory}\PARSEC.EXE</source>
+			<source>${project.build.outputDirectory}\parsec.exe</source>
 		</file>
 	</files>
 </assembly>

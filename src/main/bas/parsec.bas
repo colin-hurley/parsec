@@ -1,5 +1,6 @@
 ' Parsec 1.8.0 Source Code
-' written in QuickBasic 7.1.
+' Originally written in QuickBasic 7.1.
+' Ported to FreeBASIC 1.05.0.
 '------------------------------------------------------------------------------
 
 '----------------------- Main Subs --------------------------------------------
@@ -48,7 +49,7 @@ DECLARE FUNCTION Trim$ (tString$)
 '----------------------- Misc Subs --------------------------------------------
 DECLARE FUNCTION GetArrayPrefix$ (codeWord$)
 DECLARE FUNCTION GetVarType$ (var$)
-DECLARE FUNCTION SubType$ (type$)
+DECLARE FUNCTION SubType$ (theType$)
 DECLARE FUNCTION CharNum% (codeLine$, char$)
 DECLARE FUNCTION InStringArray% (sArray$(), sValue$)
 
@@ -60,12 +61,12 @@ DECLARE SUB PrintError (priority%, errorMsg$)
 DECLARE SUB UpdateBar ()
 
 '----------------------- Checking Subs ----------------------------------------
-DECLARE SUB CheckSymType (type$)
-DECLARE SUB CheckSymName (type$, name$)
-DECLARE SUB CheckSymVal (type$, initVal$)
-DECLARE SUB CheckSymExt (type$, exten$, extVal$)
+DECLARE SUB CheckSymType (theType$)
+DECLARE SUB CheckSymName (theType$, theName$)
+DECLARE SUB CheckSymVal (theType$, initVal$)
+DECLARE SUB CheckSymExt (theType$, exten$, extVal$)
 DECLARE SUB CheckForExtConflict (exten$(), extCount%)
-DECLARE SUB CheckExpType (expect$, type$, valDesc$)
+DECLARE SUB CheckExpType (expect$, theType$, valDesc$)
 
 '----------------------- Validation Functions ---------------------------------
 DECLARE FUNCTION IsValidName% (parseString$)
@@ -77,7 +78,8 @@ DECLARE FUNCTION IsValidVector% (vector$)
 
 '----------------------- Misc Startup -----------------------------------------
 
-CLEAR , , 8000
+' FreeBASIC migration - CLEAR is not supported by FreeBASIC
+'CLEAR , , 8000
 ON ERROR GOTO HandleError
 CreateAPI
 DIM SHARED time1!
@@ -90,6 +92,8 @@ REM $DYNAMIC
 'Arrays
 ' Note: Unfortunately, we cannot be too generous with the memory space
 ' allocation; otherwise, code 14 (out of string space) will be thrown.
+' This is the case in QuickBASIC at least. Need to confirm whether or not this
+' happens with FreeBASIC as well.
 DIM SHARED symType$(1 TO 30)
 DIM SHARED symExt$(1 TO 10)
 DIM SHARED message$(1 TO 100)
@@ -254,7 +258,7 @@ FUNCTION CharNum% (codeLine$, char$)
 
 END FUNCTION
 
-SUB CheckExpType (expect$, type$, valDesc$)
+SUB CheckExpType (expect$, theType$, valDesc$)
 
 	'----------------------------------------------------------------------
 	' This sub is called to make sure that the type that was found is
@@ -265,19 +269,19 @@ SUB CheckExpType (expect$, type$, valDesc$)
 	DIM isErr%
 	isErr% = 0
 
-	IF INSTR(expect$, type$) < 1 THEN
-		IF expect$ = "int" AND (INSTR(type$, "flex") > 0 OR INSTR(type$, "float") > 0) THEN
+	IF INSTR(expect$, theType$) < 1 THEN
+		IF expect$ = "int" AND (INSTR(theType$, "flex") > 0 OR INSTR(theType$, "float") > 0) THEN
 			'trap
-		ELSEIF expect$ = "flex" AND (INSTR(type$, "int") > 0 OR INSTR(type$, "float") > 0) THEN
+		ELSEIF expect$ = "flex" AND (INSTR(theType$, "int") > 0 OR INSTR(theType$, "float") > 0) THEN
 			'trap
-		ELSEIF expect$ = "float" AND (INSTR(type$, "int") > 0 OR INSTR(type$, "flex") > 0) THEN
+		ELSEIF expect$ = "float" AND (INSTR(theType$, "int") > 0 OR INSTR(theType$, "flex") > 0) THEN
 			'trap
 		ELSE
 			isErr% = 1
 		END IF
 	END IF
 
-	IF isErr% = 1 THEN CALL PrintError(0, "Type mismatch. " + expect$ + " value expected, but " + type$ + " found in " + valDesc$ + " on line" + STR$(lineNum%) + ".")
+	IF isErr% = 1 THEN CALL PrintError(0, "Type mismatch. " + expect$ + " value expected, but " + theType$ + " found in " + valDesc$ + " on line" + STR$(lineNum%) + ".")
 
 END SUB
 
@@ -362,7 +366,7 @@ SUB CheckForExtConflict (exten$(), extCount%)
 
 END SUB
 
-SUB CheckSymExt (type$, exten$, extVal$)
+SUB CheckSymExt (theType$, exten$, extVal$)
 
 	'----------------------------------------------------------------------
 	' This function checks a symbol's extension to make sure that it's
@@ -375,10 +379,10 @@ SUB CheckSymExt (type$, exten$, extVal$)
 		CALL PrintError(0, "Invalid symbol extension, " + exten$ + ", on line" + STR$(lineNum%) + ".")
 	ELSE
 		'------- Make sure exten fits type ----------------------------
-		IF type$ = "message" AND exten$ <> "desc" THEN
-			CALL PrintError(0, "The extension, " + exten$ + ", used on line" + STR$(lineNum%) + " is not valid for a symbol of the " + type$ + " type.")
-		ELSEIF type$ <> "sector" AND type$ <> "surface" AND type$ <> "thing" AND exten$ <> "local" AND exten$ <> "desc" THEN
-			CALL PrintError(0, "The extension, " + exten$ + ", used on line" + STR$(lineNum%) + " is not valid for the " + type$ + " symbol type.")
+		IF theType$ = "message" AND exten$ <> "desc" THEN
+			CALL PrintError(0, "The extension, " + exten$ + ", used on line" + STR$(lineNum%) + " is not valid for a symbol of the " + theType$ + " type.")
+		ELSEIF theType$ <> "sector" AND theType$ <> "surface" AND theType$ <> "thing" AND exten$ <> "local" AND exten$ <> "desc" THEN
+			CALL PrintError(0, "The extension, " + exten$ + ", used on line" + STR$(lineNum%) + " is not valid for the " + theType$ + " symbol type.")
 		END IF
 	END IF
 
@@ -399,7 +403,7 @@ SUB CheckSymExt (type$, exten$, extVal$)
 
 END SUB
 
-SUB CheckSymName (type$, name$)
+SUB CheckSymName (theType$, theName$)
 
 	'----------------------------------------------------------------------
 	' This function checks the symbol name given to it to make sure that it
@@ -410,39 +414,39 @@ SUB CheckSymName (type$, name$)
 	
 	'--------------- Check First Char -------------------------------------
 
-	char% = ASC(MID$(name$, 1, 1))
-	IF char% < 95 OR char% > 122 THEN CALL PrintError(0, "The symbol, " + name$ + ", begins with a numerical character.")
+	char% = ASC(MID$(theName$, 1, 1))
+	IF char% < 95 OR char% > 122 THEN CALL PrintError(0, "The symbol, " + theName$ + ", begins with a numerical character.")
 
-	IF type$ = "message" THEN
-		IF InStringArray%(message$(), name$) = 0 THEN CALL PrintError(0, "Unknown message, " + name$ + ", declared on line" + STR$(lineNum%) + ".")
+	IF theType$ = "message" THEN
+		IF InStringArray%(message$(), theName$) = 0 THEN CALL PrintError(0, "Unknown message, " + theName$ + ", declared on line" + STR$(lineNum%) + ".")
 	ELSE
-		IF IsValidName%(name$) = 0 THEN
-			CALL PrintError(0, "Symbol name, " + name$ + ", on line" + STR$(lineNum%) + " is invalid.")
-		ELSEIF InStringArray%(message$(), name$) > 0 THEN
-			CALL PrintError(0, "Warning: symbol name, " + name$ + ", on line" + STR$(lineNum%) + " is a message name and using it will void the message.")
-		ELSEIF InStringArray%(verbName$(), name$) > 0 THEN
-			CALL PrintError(0, "Warning: symbol name, " + name$ + ", on line" + STR$(lineNum%) + " is a verb name and using it will void the verb.")
+		IF IsValidName%(theName$) = 0 THEN
+			CALL PrintError(0, "Symbol name, " + theName$ + ", on line" + STR$(lineNum%) + " is invalid.")
+		ELSEIF InStringArray%(message$(), theName$) > 0 THEN
+			CALL PrintError(0, "Warning: symbol name, " + theName$ + ", on line" + STR$(lineNum%) + " is a message name and using it will void the message.")
+		ELSEIF InStringArray%(verbName$(), theName$) > 0 THEN
+			CALL PrintError(0, "Warning: symbol name, " + theName$ + ", on line" + STR$(lineNum%) + " is a verb name and using it will void the verb.")
 		END IF
 	END IF
 
 	'--------------- Check for Duplicate Name -----------------------------
 
-	IF InStringArray%(varName$(), name$) > 0 THEN CALL PrintError(0, "The symbol name, " + name$ + ", on line" + STR$(lineNum%) + " has already been used.")
+	IF InStringArray%(varName$(), theName$) > 0 THEN CALL PrintError(0, "The symbol name, " + theName$ + ", on line" + STR$(lineNum%) + " has already been used.")
 
 END SUB
 
-SUB CheckSymType (type$)
+SUB CheckSymType (theType$)
 
 	'----------------------------------------------------------------------
 	' This function checks the given symbol type to make sure that it is a
 	' known type.
 	'----------------------------------------------------------------------
 
-	IF InStringArray%(symType$(), type$) = 0 THEN CALL PrintError(0, "Invalid symbol type, " + type$ + ", found on line" + STR$(lineNum%) + ".")
+	IF InStringArray%(symType$(), theType$) = 0 THEN CALL PrintError(0, "Invalid symbol type, " + theType$ + ", found on line" + STR$(lineNum%) + ".")
 
 END SUB
 
-SUB CheckSymVal (type$, initVal$)
+SUB CheckSymVal (theType$, initVal$)
 
 	'----------------------------------------------------------------------
 	' This function checks a symbol's initial value to make sure that it's
@@ -455,36 +459,36 @@ SUB CheckSymVal (type$, initVal$)
 
 	IF initVal$ = "null" THEN EXIT SUB
 
-	IF type$ = "ai" OR type$ = "keyframe" OR type$ = "material" OR type$ = "model" OR type$ = "sound" THEN
+	IF theType$ = "ai" OR theType$ = "keyframe" OR theType$ = "material" OR theType$ = "model" OR theType$ = "sound" THEN
 		x% = 1
 		fileName$ = CutAtNextDelimit$(initVal$, x%, ".")
 		ext$ = MID$(initVal$, x% + 1, LEN(initVal$) - x% + 1)
 
-		IF type$ = "ai" AND ext$ <> "ai" AND ext$ <> "ai0" AND ext$ <> "ai2" THEN
+		IF theType$ = "ai" AND ext$ <> "ai" AND ext$ <> "ai0" AND ext$ <> "ai2" THEN
 			beenError% = 1
-		ELSEIF type$ = "keyframe" AND ext$ <> "key" THEN
+		ELSEIF theType$ = "keyframe" AND ext$ <> "key" THEN
 			beenError% = 1
-		ELSEIF type$ = "material" AND ext$ <> "mat" THEN
+		ELSEIF theType$ = "material" AND ext$ <> "mat" THEN
 			beenError% = 1
-		ELSEIF type$ = "model" AND ext$ <> "3do" THEN
+		ELSEIF theType$ = "model" AND ext$ <> "3do" THEN
 			beenError% = 1
-		ELSEIF type$ = "sound" AND ext$ <> "wav" THEN
+		ELSEIF theType$ = "sound" AND ext$ <> "wav" THEN
 			beenError% = 1
 		END IF
 
 		IF beenError% = 1 THEN CALL PrintError(0, "Invalid file extension, " + ext$ + ", found for the initial value of the symbol on line" + STR$(lineNum%) + ".")
 		IF IsValidName%(fileName$) = 0 THEN CALL PrintError(0, "A symbol on line" + STR$(lineNum%) + " is assigned to a file name that may be invalid.")
 
-	ELSEIF type$ = "vector" OR type$ = "message" THEN
-		CALL PrintError(0, "The symbol of type, " + type$ + ", used on line" + STR$(lineNum%) + " cannot have an initial value.")
+	ELSEIF theType$ = "vector" OR theType$ = "message" THEN
+		CALL PrintError(0, "The symbol of type, " + theType$ + ", used on line" + STR$(lineNum%) + " cannot have an initial value.")
 
-	ELSEIF type$ = "flex" OR type$ = "float" THEN
+	ELSEIF theType$ = "flex" OR theType$ = "float" THEN
 		IF IsValidFlex%(initVal$) = 0 THEN CALL PrintError(0, "Invalid initial value, " + initVal$ + ", found for the symbol on line" + STR$(lineNum%) + ".")
 
-	ELSEIF type$ = "cog" OR type$ = "thing" OR type$ = "sector" OR type$ = "surface" OR type$ = "int" THEN
+	ELSEIF theType$ = "cog" OR theType$ = "thing" OR theType$ = "sector" OR theType$ = "surface" OR theType$ = "int" THEN
 		IF IsValidInt%(initVal$) = 0 THEN CALL PrintError(0, "Invalid initial value, " + initVal$ + ", for the symbol on line" + STR$(lineNum%) + ".")
 
-	ELSEIF type$ = "template" THEN
+	ELSEIF theType$ = "template" THEN
 		FOR x% = 1 TO LEN(initVal$)
 			charint% = ASC(MID$(initVal$, x%, 1))
 			'if charint is not a 0-9 number, a lowercase letter, an underscore, or a plus, then there's an error.
@@ -614,7 +618,10 @@ FUNCTION CutAtNextDelimit$ (codeLine$, x%, del$)
 	CALL GetToNextChar(codeLine$, x%)
 	lastBreak% = x%
 
-	FOR x% = x% TO LEN(codeLine$)
+	' FreeBASIC migration - Use local iterator variable to avoid "error 51: Expected scalar counter..."
+	DIM itr%
+	FOR itr% = x% TO LEN(codeLine$)
+		x% = itr%
 		char$ = MID$(codeLine$, x%, 1)
 		IF MID$(codeLine$, x%, 2) = "//" THEN
 			IF CharNum%(del$, "/") > 1 THEN EXIT FOR
@@ -625,7 +632,8 @@ FUNCTION CutAtNextDelimit$ (codeLine$, x%, del$)
 		ELSEIF INSTR(del$, " ") > 0 AND char$ = CHR$(9) THEN
 			EXIT FOR
 		END IF
-	NEXT x%
+	NEXT itr%
+	x% = itr%
 
 	CutAtNextDelimit$ = Trim$(MID$(codeLine$, lastBreak%, x% - lastBreak%))
 
@@ -1096,10 +1104,14 @@ SUB DoString (codeLine$, x%)
 	' DoString is called by DoValue when it encounters a double quote.
 	'----------------------------------------------------------------------
 
+	' FreeBASIC migration - Use local iterator variable to avoid "error 51: Expected scalar counter..."
+	DIM itr%
 	'+1 to get past opening quotes
-	FOR x% = x% + 1 TO LEN(codeLine$)
+	FOR itr% = x% + 1 TO LEN(codeLine$)
+		x% = itr%
 		IF ASC(MID$(codeLine$, x%, 1)) = 34 THEN EXIT FOR
-	NEXT x%
+	NEXT itr%
+	x% = itr%
 
 	IF x% > LEN(codeLine$) THEN CALL PrintError(1, "No end to the string value on line" + STR$(lineNum%) + ".")
 	x% = x% + 1     'get past end quote
@@ -1135,9 +1147,9 @@ SUB DoSubExp (codeLine$, x%, del$, expType$, valDesc$)
 			expect$ = "op/end"
 
 		ELSEIF expect$ = "value" THEN
-			type$ = DoValue$(codeLine$, x%, expType$)
-			'CALL PrintError(0, "Warning:" + type$)
-			IF LEN(expType$) > 1 THEN CALL CheckExpType(expType$, type$, valDesc$)
+			theType$ = DoValue$(codeLine$, x%, expType$)
+			'CALL PrintError(0, "Warning:" + theType$)
+			IF LEN(expType$) > 1 THEN CALL CheckExpType(expType$, theType$, valDesc$)
 			expect$ = "op/end"
 
 		ELSEIF IsOperator%(altChar$) = 1 AND expect$ = "op/end" THEN    'note that we check for two-char ops first.
@@ -1171,7 +1183,7 @@ FUNCTION DoValue$ (codeLine$, x%, expType$)
 	' value can be a function, number, variable, string, vector, etc.
 	'----------------------------------------------------------------------
 
-	DIM type$
+	DIM theType$
 	DIM lastBreak%
 	DIM verbNum%
 
@@ -1181,11 +1193,11 @@ FUNCTION DoValue$ (codeLine$, x%, expType$)
 
 	IF nextChar$ = CHR$(34) THEN    'Note that we check for a string before we check the length of codeWord$
 		CALL DoString(codeLine$, x%)   'Strings can contain other delimiters so we can't use an IsValid function.
-		type$ = "string"
+		theType$ = "string"
 
 	ELSEIF nextChar$ = "'" THEN     'Same as above.
 		CALL DoVector(codeLine$, x%)
-		type$ = "vector"
+		theType$ = "vector"
 
 	ELSEIF LEN(codeWord$) < 1 THEN
 		CALL PrintError(1, "Value expected, but " + nextChar$ + " found on line" + STR$(lineNum%) + ".")
@@ -1193,17 +1205,17 @@ FUNCTION DoValue$ (codeLine$, x%, expType$)
 	ELSEIF nextChar$ = "(" THEN
 		x% = lastBreak%
 		verbNum% = DoFunction%(codeLine$, x%)
-		type$ = verbRet$(verbNum%)
-		IF type$ = "void" THEN CALL PrintError(1, "The verb, " + verbName$(verbNum%) + ", is used on line" + STR$(lineNum%) + " in an expression.")
+		theType$ = verbRet$(verbNum%)
+		IF theType$ = "void" THEN CALL PrintError(1, "The verb, " + verbName$(verbNum%) + ", is used on line" + STR$(lineNum%) + " in an expression.")
 
 	ELSEIF IsValidInt%(codeWord$) = 1 THEN
-		type$ = "int"
+		theType$ = "int"
 
 	ELSEIF IsValidFlex%(codeWord$) = 1 THEN
-		type$ = "flex"
+		theType$ = "flex"
 
 	ELSEIF InStringArray%(message$(), codeWord$) > 0 AND InStringArray%(varName$(), codeWord$) = 0 THEN
-		type$ = "message"
+		theType$ = "message"
 
 	ELSEIF IsValidName%(codeWord$) = 1 THEN
 		IF nextChar$ = "[" THEN
@@ -1219,7 +1231,7 @@ FUNCTION DoValue$ (codeLine$, x%, expType$)
 		END IF
 
 		IF InStringArray%(varName$(), codeWord$) = 0 THEN CALL PrintError(0, "The variable, " + codeWord$ + ", found in the expression on line" + STR$(lineNum%) + " is undefined.")
-		type$ = GetVarType$(codeWord$)
+		theType$ = GetVarType$(codeWord$)
 	ELSE
 		IF LEN(codeWord$) > 0 AND LEN(nextChar$) > 0 THEN
 			CALL PrintError(1, "Value expected, but " + codeWord$ + " and " + nextChar$ + " found on line" + STR$(lineNum%) + ".")
@@ -1230,7 +1242,7 @@ FUNCTION DoValue$ (codeLine$, x%, expType$)
 		END IF
 	END IF
 
-	DoValue$ = SubType(type$)
+	DoValue$ = SubType(theType$)
 
 END FUNCTION
 
@@ -1239,10 +1251,14 @@ SUB DoVector (codeLine$, x%)
 	DIM lastBreak%
 	lastBreak% = x%
 
+	' FreeBASIC migration - Use local iterator variable to avoid "error 51: Expected scalar counter..."
+	DIM itr%
 	'+1 to get past opening quote
-	FOR x% = x% + 1 TO LEN(codeLine$)
+	FOR itr% = x% + 1 TO LEN(codeLine$)
+		x% = itr%
 		IF MID$(codeLine$, x%, 1) = "'" THEN EXIT FOR
-	NEXT x%
+	NEXT itr%
+	x% = itr%
 
 	codeWord$ = MID$(codeLine$, lastBreak%, x% - lastBreak% + 1)
 	IF IsValidVector%(codeWord$) = 0 THEN CALL PrintError(1, "Invalid vector, " + codeWord$ + ", found in an expression on line" + STR$(lineNum%) + ".")
@@ -1332,10 +1348,14 @@ SUB GetToNextChar (codeLine$, x%)
 	'----------------------------------------------------------------------
 
 	DIM char$
-	FOR x% = x% TO LEN(codeLine$)
+	' FreeBASIC migration - Use local iterator variable to avoid "error 51: Expected scalar counter..."
+	DIM itr%
+	FOR itr% = x% TO LEN(codeLine$)
+		x% = itr%
 		char$ = MID$(codeLine$, x%, 1)
 		IF char$ <> " " AND char$ <> CHR$(9) THEN EXIT FOR
-	NEXT x%
+	NEXT itr%
+	x% = itr%
 
 END SUB
 
@@ -1347,11 +1367,15 @@ SUB GetToNextDelimit (codeLine$, x%, del$)
 	'----------------------------------------------------------------------
 
 	DIM char$
-	FOR x% = x% TO LEN(codeLine$)
+	' FreeBASIC migration - Use local iterator variable to avoid "error 51: Expected scalar counter..."
+	DIM itr%
+	FOR itr% = x% TO LEN(codeLine$)
+		x% = itr%
 		char$ = MID$(codeLine$, x%, 1)
 		IF INSTR(del$, char$) > 0 THEN EXIT FOR
 		IF INSTR(del$, " ") > 0 AND char$ = CHR$(9) THEN EXIT FOR
-	NEXT x%
+	NEXT itr%
+	x% = itr%
 
 END SUB
 
@@ -1508,7 +1532,7 @@ FUNCTION IsValidInt% (inputString$)
 
 END FUNCTION
 
-FUNCTION IsValidName% (name$)
+FUNCTION IsValidName% (theName$)
 
 	'----------------------------------------------------------------------
 	' The name of this function is vague, but it will check a string to
@@ -1521,8 +1545,8 @@ FUNCTION IsValidName% (name$)
 	DIM hasAlpha%
 	valid% = 1
 
-	FOR x% = 1 TO LEN(name$)
-		charint% = ASC(MID$(name$, x%, 1))
+	FOR x% = 1 TO LEN(theName$)
+		charint% = ASC(MID$(theName$, x%, 1))
 		' if charint is not 0-9 or a lowercase letter, or an underscore, or a dash, then there's an error.
 		IF (charint% < 48 OR charint% > 57) AND (charint% < 97 OR charint% > 122) AND charint% <> 95 AND charint% <> 45 THEN
 			IsValidName% = 0
@@ -1534,9 +1558,9 @@ FUNCTION IsValidName% (name$)
 	IF hasAlpha% = 0 THEN valid% = 0
 
 	'Quick hack because Parsec does not have a list of reserved words...
-	IF (name$ = "end" OR name$ = "code" OR name$ = "if" OR name$ = "do" OR name$ = "while") THEN
+	IF (theName$ = "end" OR theName$ = "code" OR theName$ = "if" OR theName$ = "do" OR theName$ = "while") THEN
 		valid% = 0
-	ELSEIF (name$ = "for" OR name$ = "else" OR name$ = "call" OR name$ = "return" OR name$ = "stop") THEN
+	ELSEIF (theName$ = "for" OR theName$ = "else" OR theName$ = "call" OR theName$ = "return" OR theName$ = "stop") THEN
 		valid% = 0
 	END IF
 
@@ -1765,9 +1789,9 @@ SUB ParseSymbols
 	PrintStatus ("Parsing Defined Variables.")
 
 	DIM a%
-	DIM type$
+	DIM theType$
 	DIM realType$
-	DIM name$
+	DIM theName$
 	DIM initVal$
 	DIM extVal$(1 TO 5)
 	DIM isBlank%
@@ -1786,8 +1810,8 @@ SUB ParseSymbols
 		isBlank% = CheckForBlankLine%(codeLine$, 1)
 		IF isBlank% = 0 THEN
 			'--------- Reset Vars ---------------------------------
-			type$ = "null"
-			name$ = "null"
+			theType$ = "null"
+			theName$ = "null"
 			initVal$ = "null"
 			extCount% = 0
 			EOL% = 0
@@ -1798,13 +1822,13 @@ SUB ParseSymbols
 
 			'--------- Main Symbol Parser -------------------------
 			x% = 1
-			type$ = CutAtNextDelimit$(codeLine$, x%, " ")
+			theType$ = CutAtNextDelimit$(codeLine$, x%, " ")
 			IF x% >= LEN(codeLine$) THEN
 				CALL PrintError(0, "Invalid symbol definition on line" + STR$(lineNum%) + ". Skipping symbol.")
 				EOL% = 1
 			END IF
 			
-			name$ = CutAtNextDelimit$(codeLine$, x%, " =#//")
+			theName$ = CutAtNextDelimit$(codeLine$, x%, " =#//")
 
 			IF EOL% = 0 THEN
 				CALL GetToNextChar(codeLine$, x%)
@@ -1832,32 +1856,32 @@ SUB ParseSymbols
 
 			IF EOL% = 0 THEN
 
-			CALL CheckSymType(type$)
-			CALL CheckSymName(type$, name$)
-			CALL CheckSymVal(type$, initVal$)
+			CALL CheckSymType(theType$)
+			CALL CheckSymName(theType$, theName$)
+			CALL CheckSymVal(theType$, initVal$)
 			FOR a% = 1 TO extCount%
-				CALL CheckSymExt(type$, exten$(a%), extVal$(a%))
+				CALL CheckSymExt(theType$, exten$(a%), extVal$(a%))
 			NEXT a%
 			CALL CheckForExtConflict(exten$(), extCount%)
 
 			'--------- Substitute Type ----------------------------
 
-			realType$ = type$
-			type$ = SubType$(type$)
+			realType$ = theType$
+			theType$ = SubType$(theType$)
 
 			'--------- Record Variable ----------------------------
 
 			varCount% = varCount% + 1
-			varName$(varCount%) = name$
-			varType$(varCount%) = type$
+			varName$(varCount%) = theName$
+			varType$(varCount%) = theType$
 
 			IF InStringArray%(exten$(), "local") = 0 THEN
-				IF realType$ = "sector" OR realType$ = "surface" OR realType$ = "thing" THEN varConst$(varCount%) = name$
+				IF realType$ = "sector" OR realType$ = "surface" OR realType$ = "thing" THEN varConst$(varCount%) = theName$
 				numAssignVars% = numAssignVars% + 1
-				assignVar$(numAssignVars%) = name$
+				assignVar$(numAssignVars%) = theName$
 			ELSEIF initVal$ <> "null" THEN
 				numAssignVars% = numAssignVars% + 1
-				assignVar$(numAssignVars%) = name$
+				assignVar$(numAssignVars%) = theName$
 			END IF
 
 			END IF  'for EOL check
@@ -1872,7 +1896,7 @@ SUB ParseSymbols
 	
 END SUB
 
-SUB PrintError (priority%, err$)
+SUB PrintError (priority%, errorMsg$)
 
 	'----------------------------------------------------------------------
 	' PrintError is called to print an error in the API error box. If
@@ -1886,28 +1910,28 @@ SUB PrintError (priority%, err$)
 
 	errNum% = errNum% + 1
 	IF errNum% <= 6 THEN
-		IF LEN(err$) > 67 THEN
-			CALL ChopString(err$, extra$, 67)
-			errors$(errNum%) = err$
+		IF LEN(errorMsg$) > 67 THEN
+			CALL ChopString(errorMsg$, extra$, 67)
+			errors$(errNum%) = errorMsg$
 			errNum% = errNum% + 1
 			errors$(errNum%) = extra$
 		ELSE
-			errors$(errNum%) = err$
+			errors$(errNum%) = errorMsg$
 		END IF
 	ELSE
-		IF LEN(err$) > 67 THEN
+		IF LEN(errorMsg$) > 67 THEN
 			FOR a% = 1 TO 4
 				errors$(a%) = errors$(a% + 1)
 			NEXT a%
-			CALL ChopString(err$, extra$, 67)
-			errors$(5) = err$
+			CALL ChopString(errorMsg$, extra$, 67)
+			errors$(5) = errorMsg$
 			errNum% = errNum% + 1
 			errors$(6) = extra$
 		ELSE
 			FOR a% = 1 TO 5
 				errors$(a%) = errors$(a% + 1)
 			NEXT a%
-			errors$(6) = err$
+			errors$(6) = errorMsg$
 		END IF
 	END IF
 
@@ -1916,7 +1940,7 @@ SUB PrintError (priority%, err$)
 		PRINT errors$(a%) + STRING$(67 - LEN(errors$(a%)), 32)
 	NEXT a%
 
-	IF errNum% >= 6 AND INSTR(err$, "Warning") < 1 AND INSTR(err$, "Parse of") < 1 AND priority% = 0 THEN
+	IF errNum% >= 6 AND INSTR(errorMsg$, "Warning") < 1 AND INSTR(errorMsg$, "Parse of") < 1 AND priority% = 0 THEN
 		PrintStatus ("Too many errors in " + ReverseCutAtDelimit$(COMMAND$, LEN(COMMAND$), "\") + ". Aborting...")
 		MakeExit
 	END IF
@@ -2055,9 +2079,13 @@ FUNCTION ReverseCutAtDelimit$ (codeLine$, x%, del$)
 	DIM lastBreak%
 	lastBreak% = x%
 	
-	FOR x% = x% TO 1 STEP -1
+	' FreeBASIC migration - Use local iterator variable to avoid "error 51: Expected scalar counter..."
+	DIM itr%
+	FOR itr% = x% TO 1 STEP -1
+		x% = itr%
 		IF INSTR(del$, MID$(codeLine$, x%, 1)) > 0 THEN EXIT FOR
-	NEXT x%
+	NEXT itr%
+	x% = itr%
 
 	ReverseCutAtDelimit$ = LCASE$(Trim$(MID$(codeLine$, x% + 1, lastBreak%)))
 
@@ -2083,40 +2111,40 @@ SUB SkipComments
 
 END SUB
 
-FUNCTION SubType$ (type$)
+FUNCTION SubType$ (theType$)
 
-	IF type$ = "ai" THEN
+	IF theType$ = "ai" THEN
 		SubType$ = aisub$
-	ELSEIF type$ = "cog" THEN
+	ELSEIF theType$ = "cog" THEN
 		SubType$ = cogsub$
-	ELSEIF type$ = "flex" THEN
+	ELSEIF theType$ = "flex" THEN
 		SubType$ = flexsub$
-	ELSEIF type$ = "float" THEN
+	ELSEIF theType$ = "float" THEN
 		SubType$ = floatsub$
-	ELSEIF type$ = "int" THEN
+	ELSEIF theType$ = "int" THEN
 		SubType$ = intsub$
-	ELSEIF type$ = "keyframe" THEN
+	ELSEIF theType$ = "keyframe" THEN
 		SubType$ = keyframesub$
-	ELSEIF type$ = "material" THEN
+	ELSEIF theType$ = "material" THEN
 		SubType$ = materialsub$
-	ELSEIF type$ = "message" THEN
+	ELSEIF theType$ = "message" THEN
 		SubType$ = messagesub$
-	ELSEIF type$ = "model" THEN
+	ELSEIF theType$ = "model" THEN
 		SubType$ = modelsub$
-	ELSEIF type$ = "surface" THEN
+	ELSEIF theType$ = "surface" THEN
 		SubType$ = surfacesub$
-	ELSEIF type$ = "sound" THEN
+	ELSEIF theType$ = "sound" THEN
 		SubType$ = soundsub$
-	ELSEIF type$ = "sector" THEN
+	ELSEIF theType$ = "sector" THEN
 		SubType$ = sectorsub$
-	ELSEIF type$ = "template" THEN
+	ELSEIF theType$ = "template" THEN
 		SubType$ = templatesub$
-	ELSEIF type$ = "thing" THEN
+	ELSEIF theType$ = "thing" THEN
 		SubType$ = thingsub$
-	ELSEIF type$ = "vector" THEN
+	ELSEIF theType$ = "vector" THEN
 		SubType$ = vectorsub$
 	ELSE
-		SubType$ = type$
+		SubType$ = theType$
 	END IF
 
 END FUNCTION
