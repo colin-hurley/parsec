@@ -3,6 +3,26 @@
 ' Ported to FreeBASIC 1.05.0.
 '------------------------------------------------------------------------------
 
+'----------------------- Constants --------------------------------------------
+
+'16-color terminal palette constants
+CONST BLACK = 0
+CONST DARK_BLUE = 1
+CONST DARK_GREEN = 2
+CONST DARK_CYAN = 3
+CONST DARK_RED = 4
+CONST DARK_MAGENTA = 5
+CONST DARK_YELLOW = 6
+CONST LIGHT_GRAY = 7
+CONST DARK_GRAY = 8
+CONST LIGHT_BLUE = 9
+CONST LIGHT_GREEN = 10
+CONST LIGHT_CYAN = 11
+CONST LIGHT_RED = 12
+CONST LIGHT_MAGENTA = 13
+CONST LIGHT_YELLOW = 14
+CONST WHITE = 15
+
 '----------------------- Main Subs --------------------------------------------
 DECLARE SUB SkipComments ()
 DECLARE SUB CloseCog ()
@@ -517,7 +537,7 @@ SUB ChopString (str1$, str2$, Length%)
 	NEXT x%
 
 	IF x% = 1 THEN
-		COLOR 0, 7
+		COLOR BLACK, LIGHT_GRAY
 		CLS
 		PRINT "Internal Error: ChopString could not break up a solid string."
 	END IF
@@ -545,28 +565,36 @@ SUB CreateAPI
 	DIM a%
 	CLS
 
+	' This WIDTH command could be used to resize the terminal window to the
+	' correct dimensions.
+	'WIDTH 80, 25
+
 	'--------------- Print Title Bar --------------------------------------
 
-	COLOR 0, 7
-	PRINT SPACE$(33); "Parsec v1.8.0"; SPACE$(34);
+	COLOR BLACK, LIGHT_GRAY
+	PRINT SPACE$(33); "Parsec v1.8.0"; SPACE$(34)
 
 	'--------------- Print main window ------------------------------------
 
-	COLOR 7, 1
+	COLOR LIGHT_GRAY, DARK_BLUE
+	LOCATE 2
 	PRINT CHR$(201); STRING$(78, 205); CHR$(187)
 	FOR a% = 1 TO 19
+		LOCATE 2 + a%
 		PRINT CHR$(186); SPACE$(78); CHR$(186)
 	NEXT a%
+	LOCATE 22
 	PRINT CHR$(200); STRING$(78, 205); CHR$(188)
 
 	'--------------- Print Status Bar -------------------------------------
 
-	COLOR 0, 3
+	COLOR BLACK, DARK_CYAN
+	LOCATE 23
 	PRINT STRING$(80, 32)
 
 	'--------------- Create Bar Graph Shadow ------------------------------
 
-	COLOR 0, 8
+	COLOR DARK_GRAY, BLACK
 	FOR a% = 5 TO 7
 		LOCATE a%, 17
 		PRINT SPACE$(52);
@@ -581,7 +609,7 @@ SUB CreateAPI
 
 	'--------------- Create Bar Graph -------------------------------------
 
-	COLOR 0, 7
+	COLOR BLACK, LIGHT_GRAY
 	LOCATE 4, 15
 	PRINT CHR$(201); STRING$(50, 205); CHR$(187)
 	LOCATE 5, 15
@@ -1607,16 +1635,19 @@ SUB MakeExit
 	' key to be pressed before ending the program.
 	'----------------------------------------------------------------------
 
-	COLOR 0, 8
+	'--------------- Create Button Shadow ---------------------------------
+
+	COLOR DARK_GRAY, BLACK
 	LOCATE 20, 37
 	PRINT SPACE$(8);
 	LOCATE 21, 37
 	PRINT SPACE$(8);
 	LOCATE 22, 37
-	COLOR 8, 8
 	PRINT STRING$(8, 205)
 
-	COLOR 0, 7
+	'--------------- Create Button ----------------------------------------
+
+	COLOR BLACK, LIGHT_GRAY
 	LOCATE 19, 36
 	PRINT CHR$(201); STRING$(6, 205); CHR$(187)
 	LOCATE 20, 36
@@ -1624,10 +1655,14 @@ SUB MakeExit
 	LOCATE 21, 36
 	PRINT CHR$(200); STRING$(6, 205); CHR$(188)
 
+	'--------------- Wait for key to be pressed ---------------------------
+
 	DO WHILE INKEY$ = ""
 	LOOP
 
-	COLOR 7, 0
+	'--------------- Restore original terminal colors ---------------------
+
+	COLOR LIGHT_GRAY, BLACK
 	CLS
 	END
 
@@ -1906,7 +1941,7 @@ SUB PrintError (priority%, errorMsg$)
 
 	DIM extra$
 	DIM a%
-	COLOR 4, 7
+	COLOR DARK_RED, LIGHT_GRAY
 
 	errNum% = errNum% + 1
 	IF errNum% <= 6 THEN
@@ -1958,7 +1993,7 @@ SUB PrintStatus (stat$)
 	' This sub prints strings to the status bar of the API.
 	'----------------------------------------------------------------------
 
-	COLOR 0, 3
+	COLOR BLACK, DARK_CYAN
 	LOCATE 23, 2
 	PRINT stat$ + SPACE$(70 - LEN(stat$))
 
@@ -2188,7 +2223,7 @@ SUB UpdateBar
 	ratio! = 48 / numLines%
 	percent% = CINT(lineNum% * ratio!)
 
-	COLOR 2, 7
+	COLOR DARK_GREEN, LIGHT_GRAY
 	FOR a% = 1 TO percent%
 		LOCATE 5, 16 + a%
 		PRINT CHR$(219)
