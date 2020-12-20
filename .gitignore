@@ -1,0 +1,7 @@
+# Ignore Eclipse settings
+.settings/
+.classpath
+.project
+
+# Ignore build output
+target/

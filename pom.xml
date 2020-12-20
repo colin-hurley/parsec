@@ -1,0 +1,144 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>net.jkhub.tools</groupId>
+	<artifactId>parsec</artifactId>
+	<version>1.7.0</version>
+	<packaging>pom</packaging>
+	<name>Parsec</name>
+	<description>Parsec will check a cog for basic errors and report them</description>
+	<properties>
+		<!--
+			Default locations for external tools.
+			Set the appropriate *_HOME environment variables (see profiles) or *.home system
+			properties to override these defaults.
+		-->
+		<!-- DOSBox v0.74 - This is used to run the QuickBASIC compiler -->
+		<dosbox.home>C:\Program Files\DOSBox-0.74</dosbox.home>
+		<!-- Microsoft QuickBASIC Extended v7.1 - This is used to compile the code -->
+		<qb.home>C:\Program Files\qb71</qb.home>
+	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<!-- Dependency BOM -->
+			<dependency>
+				<groupId>net.jkhub.tools</groupId>
+				<artifactId>parsec</artifactId>
+				<version>${project.version}</version>
+				<type>zip</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<build>
+		<resources>
+			<resource>
+				<directory>src\main\resources</directory>
+				<excludes>
+					<exclude>*.bat</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>src\main\resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>*.bat</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src\main\bas</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<!-- Copy resources from src to target -->
+						<id>copy-resources</id>
+						<goals>
+							<goal>resources</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<!-- Compile the source into an executable -->
+						<id>compile</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>${dosbox.home}\DOSBox.exe</executable>
+							<arguments>
+								<argument>-exit</argument>
+								<argument>${project.build.outputDirectory}\build.bat</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<!-- Build distribution archive -->
+						<id>package</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<appendAssemblyId>false</appendAssemblyId>
+							<descriptors>
+								<descriptor>${project.basedir}\src\assembly\assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<profiles>
+		<profile>
+			<!--
+				If the user has set the DOSBOX_HOME environment variable, use it to initialize the
+				dosbox.home property. This allows the user to set the environment variable once instead
+				of needing to set the system property on the command line for every build.
+			-->
+			<id>env.DOSBOX_HOME-override</id>
+			<activation>
+				<property>
+					<name>env.DOSBOX_HOME</name>
+				</property>
+			</activation>
+			<properties>
+				<dosbox.home>${env.DOSBOX_HOME}</dosbox.home>
+			</properties>
+		</profile>
+		<profile>
+			<!--
+				If the user has set the QB_HOME environment variable, use it to initialize the
+				qb.home property. This allows the user to set the environment variable once instead
+				of needing to set the system property on the command line for every build.
+			-->
+			<id>env.QB_HOME-override</id>
+			<activation>
+				<property>
+					<name>env.QB_HOME</name>
+				</property>
+			</activation>
+			<properties>
+				<qb.home>${env.QB_HOME}</qb.home>
+			</properties>
+		</profile>
+	</profiles>
+</project>

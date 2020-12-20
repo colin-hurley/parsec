@@ -1,0 +1,29 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 http://maven.apache.org/xsd/assembly-2.1.0.xsd">
+	<id>bin</id>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<fileSets>
+		<fileSet>
+			<outputDirectory>\</outputDirectory>
+			<directory>${project.basedir}\src\main\bas</directory>
+		</fileSet>
+		<fileSet>
+			<outputDirectory>\</outputDirectory>
+			<directory>${project.basedir}\src\main\resources</directory>
+			<excludes>
+				<exclude>build.bat</exclude>
+			</excludes>
+		</fileSet>
+	</fileSets>
+	<files>
+		<file>
+			<!-- Preserve original filename case (Parsec.exe instead of PARSEC.EXE) -->
+			<!-- This explicit file mapping also causes the build to fail if PARSEC.EXE wasn't built successfully -->
+			<outputDirectory>\</outputDirectory>
+			<destName>Parsec.exe</destName>
+			<source>${project.build.outputDirectory}\PARSEC.EXE</source>
+		</file>
+	</files>
+</assembly>

@@ -1,0 +1,593 @@
+# Parsec 1.7.0 data file
+#
+# This file contains the data needed to correctly parse cogscripts.
+# Blank lines in this file are not allowed. Also, do not add extra spaces
+# as this may confuse the parser.
+#===================================================================
+settings:
+	#=======================================================================================
+	# Type substitution. Normally, Parsec will give a type mismatch error if you use
+	# values of different types in the same expression. These so-called errors may,
+	# in fact, be logically and syntactically correct. So, these type settings allow
+	# you to change how certain types will be treated.
+	#
+	# IE, cog=int means that cogs will be treated as integers.
+	#
+	# Settings *must* come before verbs because these settings directly affect
+	# how verb type values are read.
+	#=======================================================================================
+ai=int
+cog=int
+flex=flex
+float=float
+int=int
+keyframe=int
+material=int
+model=int
+message=int
+sector=int
+sound=int
+surface=int
+template=int
+thing=int
+vector=vector
+	#=======================================================================================
+	# Some flexes begin or end with a period. This isn't really an error so this option
+	# is provided to turn it on or off.
+	#=======================================================================================
+allow_bad_flexes=1
+	#=======================================================================================
+	# Some statements may span multiple lines. If you want to allow this, set strict_parse
+	# to 0, and Parsec will not give errors for these statements. If strict_parse is
+	# enabled, some error messages will be more accurate as to the cause of the error.
+	#=======================================================================================
+strict_parse=1
+	#=======================================================================================
+	# This option tells Parsec whether or not arrays will have the same name except
+	# for numerical characters at the end. For example:
+	#	int var0
+	#	int var1
+	#	int var2
+	# These array variables have similar names. In the next example, they do not:
+	#	int red1
+	#	int green2
+	#	int blue3
+	# Parsec has no way of knowing what a value for an array access number is. So,
+	# it cannot check for unused variables if it does not know which ones are being
+	# used by arrays. With this option, you guarantee Parsec that arrays will have
+	# similar names.
+	#=======================================================================================
+sim_array_names=1
+#===================================================================
+extensions:
+local
+linkid
+desc
+mask
+nolink
+#===================================================================
+types:
+ai
+cog
+flex
+float
+int
+keyframe
+material
+message
+model
+sector
+sound
+surface
+template
+thing
+vector
+#===================================================================
+messages:
+activate
+activated
+aievent
+arrived
+autoselect
+blocked
+changed
+created
+crossed
+damaged
+deactivated
+deselected
+entered
+exited
+fire
+global0
+join
+killed
+leave
+loading
+newplayer
+pulse
+removed
+respawn
+selected
+shutdown
+sighted
+skill
+splash
+startup
+taken
+timer
+touched
+trigger
+user0
+user1
+user2
+user3
+user4
+user5
+user5
+user6
+user7
+#===================================================================
+verbs:
+	#====================================================================================
+	# This section contains all of the verb info needed to parse verb actions.
+	# A "!" means that the verb does not function correctly.
+	#
+	# layout:
+	#   verbName   action/no action   returnType   numParams paramType1 paramType2 etc...
+	#
+	# Notes:
+	#   One verb can have no more than ten parameters.
+	#   The second value (1 or 0) indicates whether the verb performs an action or not.
+	#====================================================================================
+aiclearmode		1	void		2 thing int
+aiflee			1	void		2 thing thing
+aigetmode		0	int		1 thing
+aigetmovepos		1	!		0
+aijump			1	void		3 thing vector flex
+aisetclass		1	void		2 thing ai
+aisetfiretarget		1	void		2 thing thing
+aisetlookpos		1	void		2 thing vector
+aisetmode		1	void		2 thing int
+aisetmovepos		1	void		2 thing vector
+aisetmovespeed		1	void		2 thing flex
+aisetmovething		1	void		2 thing thing
+getactorweapon		0	template	2 thing int
+isaitargetinsight	0	int		1 thing
+setactorweapon		1	void		3 thing int template
+getmaterialcel		0	int		1 material
+materialanim		1	int		3 material int int
+setmaterialcel		1	void		2 material int
+getsurfaceanim		0	int		1 surface
+getsurfacecel		0	int		1 surface
+getwallcel		0	int		1 surface
+setsurfacecel		1	void		2 surface int
+setwallcel		1	void		2 surface int
+stopsurfaceanim		1	void		1 surface
+surfaceanim		1	int		3 surface int int
+slideceilingsky		1	int		2 flex flex
+slidehorizonsky 	1	int		2 flex flex
+slidesurface		1	int		3 surface vector flex
+slidewall		1	int		3 surface vector flex
+stopanim		1	void		1 int
+surfacelightanim	1	int		4 surface flex flex flex
+cyclecamera		1	void		0
+getcamerastateflags	0	int		0
+getcurrentcamera	0	int		0
+getprimaryfocus		0	thing		1 int
+getsecondaryfocus	0	!		0
+setcamerafocus		1	void		2 int thing
+setcamerastateflags	1	void		1 int
+setcurrentcamera	1	void		1 int
+setpovshake		1	void		4 vector vector flex flex
+adddynamicadd		1	void		4 thing int int int
+adddynamictint		1	void		4 thing flex flex flex
+freecoloreffect		1	void		1 int
+modifycoloreffect	1	void		1 int
+newcoloreffect		1	int		10 int int int flex flex flex int int int flex
+getheadlightintensity	0	!		0
+gethealth		0	flex		1 thing
+getthinghealth		0	flex		1 thing
+haslos			0	int		2 thing thing
+healthing		1	void		2 thing flex
+iscrouching		0	int		1 thing
+isthingcrouching	0	int		1 thing
+jkclearflags		1	void		2 thing int
+jkgetflags		0	int		1 thing
+jksetflags		1	void		2 thing int
+jksetinvis		1	void		2 thing int
+jksetinvulnerable	1	void		2 thing int
+setactorextraspeed	1	void		2 thing flex
+setheadlightintensity	1	!		0
+sethealth		1	void		2 thing flex
+setthinghealth		1	void		2 thing flex
+aisetlookframe		1	void		2 thing int
+aisetmoveframe		1	void		2 thing int
+getcurframe		0	int		1 thing
+getgoalframe		0	int		1 thing
+jumptoframe		1	void		3 thing int sector
+movetoframe		1	void		3 thing int flex
+pathmovepause		1	void		1 thing
+pathmoveresume		1	void		1 thing
+skiptoframe		1	void		3 thing int flex
+waitforstop		1	void		1 thing
+rotate			1	void		2 thing vector
+rotatepivot		1	void		3 thing int flex
+changeinv		1	void		3 thing int flex
+getinv			0	flex		2 thing int
+getinvcog		0	cog		2 thing int
+getinvmax		0	flex		2 thing int
+getinvmin		0	flex		2 thing int
+isinvactivated		0	int		2 thing int
+isinvavailable		0	int		2 thing int
+setbinwait		1	void		3 thing int flex
+setinv			1	void		3 thing int flex
+setinvactivated		1	void		3 thing int int
+setinvavailable		1	void		3 thing int int
+setinvflags		1	void		3 thing int int
+getkeylen		0	flex		1 keyframe
+getmajormode		0	int		1 thing
+jkplaypovkey		1	int		4 thing keyframe int int
+jkstoppovkey		1	void		3 thing int flex
+playkey			1	int		4 thing keyframe int int
+playmode		1	int		2 thing int
+stopkey			1	void		3 thing int flex
+autosavegame		1	void		0
+getceilingskyoffset	0	vector		0
+getflexgametime		0	flex		0
+getgametime		0	int		0
+getgravity		0	flex		0
+gethorizonskyoffset	0	vector		0
+getleveltime		0	flex		0
+getsectorcount		0	int		0
+getsurfacecount		0	int		0
+getthingcount		0	int		0
+getthingtemplatecount	0	int		0
+jkendlevel		1	void		1 int
+setceilingskyoffset	1	void		2 flex flex
+setgravity		1	void		1 flex
+sethorizonskyoffset	1	void		2 flex flex
+getparam		1	flex		1 int
+getsenderid		1	int		0
+getsenderref		1	int		0
+getsendertype		0	int		0
+getsourceref		0	int		0
+getsourcetype		0	int		0
+killtimerex		1	void		1 int
+returnex		1	void		1 flex
+sendmessage		1	void		2 cog message
+sendmessageex		1	flex		6 cog message flex flex flex flex
+sendtrigger		1	void		6 int int flex flex flex flex
+setparam		1	void		2 int flex
+setpulse		1	void		1 flex
+settimer		1	void		1 flex
+settimerex		1	void		4 flex int flex flex
+sleep			1	void		1 flex
+setthingpulse		1	void		2 thing flex
+setthingtimer		1	void		2 thing flex
+amputatejoint		1	void		2 thing int
+disableirmode		1	void		0
+enableirmode		1	void		2 flex flex
+getsithmode		0	!		0
+jkdisablesaber		1	void		1 thing
+jkenablesaber		1	void		4 thing flex flex flex
+jkendtarget		1	void		0
+jksetpersuasioninfo	1	void		3 thing int int
+jksetsaberinfo		1	void		9 thing material material flex flex flex template template template
+jksettarget		1	void		1 thing
+jksettargetcolors	1	void		3 int int int
+parsearg		1	void		2 thing string
+skilltarget		1	flex		4 thing int flex flex
+takeitem		1	void		2 thing thing
+thingviewdot		0	flex		2 thing thing
+clearmultimodeflags	1	void		1 int
+createbackpack		1	thing		1 thing
+getabsolutemaxplayers	0	int		0
+getmaxplayers		0	int		0
+getmultimodeflags	0	int		0
+getnumplayers		0	int		0
+getnumplayersinteam	0	int		1 int
+getplayerteam		0	int		1 thing
+getrespawnmask		0	int		1 thing
+gettimelimit		0	int		0
+ismulti			0	int		0
+isserver		0	int		0
+nthbackpackbin		0	int		2 thing int
+nthbackpackvalue	0	flex		2 thing int
+numbackpackitems	0	int		1 thing
+pickupbackpack		1	void		2 thing thing
+setmultimodeflags	1	void		1 int
+setplayerteam		1	void		2 thing int
+setrespawnmask		1	void		2 thing int
+settimelimit		1	void		2 int
+syncscores		1	void		0
+syncsector		1	void		1 sector
+syncsurface		1	void		1 surface
+syncthingattachment	1	void		1 thing
+syncthingpos		1	void		1 thing
+syncthingstate		1	void		1 thing
+getautopickup		0	int		0
+getautoreload		0	int		0
+getautoswitch		0	int		0
+getdifficulty		0	int		0
+jkgetsabercam		0	int		0
+setautopickup		1	void		2 thing int
+setautoreload		1	void		2 thing int
+setautoswitch		1	void		2 thing int
+getparticlegrowthspeed	0	flex		1 thing
+getparticlesize		0	flex		1 thing
+getparticletimeoutrate	0	flex		1 thing
+setparticlegrowthspeed	1	void		2 thing flex
+setparticlesize		1	void		2 thing flex
+setparticletimeoutrate	1	void		2 thing flex
+cleargoalflags		1	void		3 thing int int
+getlocalplayerthing	0	thing		0
+getplayernum		0	int		1 thing
+getplayerthing		0	thing		1 int
+jkclearsuperflags	1	void		1 int
+jkgetchoice		0	int		0
+jkgetlocalplayer	0	thing		0
+jkgetsuperflags		0	int		0
+jksetforcespeed		1	void		1 flex
+jksetsuperflags		1	void		1 int
+setgoalflags		1	void		3 thing int int
+jkprintunistring	1	void		2 int int
+jkstringclear		1	void		0
+jkstringconcatasciistring	1	void		1 string
+jkstringconcatflex		1	void		1 flex
+jkstringconcatformattedflex	1	!		0
+jkstringconcatformattedint	1	void		2 int string
+jkstringconcatint		1	void		1 int
+jkstringconcatplayername	1	void		1 thing
+jkstringconcatspace		1	void		0
+jkstringconcatunistring		1	void		1 int
+jkstringconcatvector	1	void		1 vector
+jkstringoutput		1	void		2 int thing
+print			1	void		1 string
+printflex		1	void		1 flex
+printint		1	void		1 int
+printvector		1	void		1 vector
+addscoretoteammembers	1	void		2 int int
+getplayerkilled		0	int		1 thing
+getplayerkills		0	int		1 thing
+getplayerscore		0	int		1 thing
+getplayersuicides	0	int		1 thing
+getscorelimit		0	int		0
+getteamscore		0	int		1 int
+setplayerkilled		1	void		2 thing int
+setplayerkills		1	void		2 thing int
+setplayerscore		1	void		2 thing int
+setplayersuicides	1	void		2 thing int
+setscorelimit		1	void		1 int
+setteamscore		1	void		2 int int
+clearsectorflags	1	void		2 sector int
+firstthinginsector	0	thing		1 sector
+getcolormap		0	int		1 sector
+getnumsectorsurfaces	0	int		1 sector
+getnumsectorvertices	0	int		1 sector
+getsectorcenter		0	vector		1 sector
+getsectorcolormap	0	int		1 sector
+getsectorflags		0	int		1 sector
+getsectorlight		0	flex		1 sector
+getsectorplayercount	0	int		1 sector
+getsectorsurfaceref	0	surface		2 sector int
+getsectorthingcount	0	int		1 sector
+getsectorthrust		0	vector		1 sector
+getsectortint		0	vector		1 sector
+getsectorvertexpos	0	vector		2 sector int
+nextthinginsector	0	thing		1 thing
+prevthinginsector	0	thing		1 thing
+sectoradjoins		1	void		2 sector int
+sectorlight		1	void		3 sector flex flex
+sectorplayercount	0	int		1 sector
+sectorthrust		1	void		3 sector vector flex
+setcolormap		1	void		2 sector int
+setsectoradjoins	1	void		2 sector int
+setsectorcolormap	1	void		2 sector int
+setsectorflags		1	void		2 sector int
+setsectorlight		1	void		3 sector flex flex
+setsectorthrust		1	void		3 sector vector flex
+setsectortint		1	void		2 sector vector
+changesoundpitch	1	void		3 int flex flex
+changesoundvol		1	void		3 int flex flex
+getsoundlen		0	flex		1 sound
+playsong		1	void		3 int int int
+playsoundclass		1	int		2 thing int
+playsoundglobal		1	int		4 sound flex flex int
+playsoundlocal		1	int		4 sound flex flex int
+playsoundpos		1	int		6 sound vector flex flex flex int
+playsoundthing		1	int		6 sound thing flex flex flex int
+sectorsound		1	void		3 sector sound flex
+setmusicvol		1	void		1 flex
+stopsound		1	void		2 int flex
+cleardebugmodeflags	1	void		1 int
+clearmapmodeflags	1	void		1 int
+clearsubmodeflags	1	void		1 int
+getdebugmodeflags	0	int		0
+getmapmodeflags		0	int		0
+getsubmodeflags		0	int		0
+setdebugmodeflags	1	void		1 int
+setmapmodeflags		1	void		1 int
+setsubmodeflags		1	void		1 int
+clearadjoinflags	1	void		2 surface int
+clearfacetype		1	void		2 surface int
+clearsurfaceflags	1	void		2 surface int
+getadjoinflags		0	int		1 surface
+getfacegeomode		0	int		1 surface
+getfacelightmode	0	int		1 surface
+getfacetexmode		0	int		1 surface
+getfacetype		0	int		1 surface
+getnumsurfacevertices	0	int		1 surface
+getsurfaceadjoin	0	surface		1 surface
+getsurfacecenter	0	vector		1 surface
+getsurfaceflags		0	int		1 surface
+getsurfacelight		0	flex		1 surface
+getsurfacemat		0	material	1 surface
+getsurfacenormal	0	vector		1 surface
+getsurfacesector	0	sector		1 surface
+getsurfacevertexpos	0	vector		2 surface int
+setadjoinflags		1	void		2 surface int
+setfacegeomode		1	void		2 surface int
+setfacelightmode	1	void		2 surface int
+setfacetexmode		1	void		2 surface int
+setfacetype		1	void		2 surface int
+setsurfaceflags		1	void		2 surface int
+setsurfacelight		1	void		3 surface flex flex
+setsurfacemat		1	void		2 surface material
+surfacecenter		0	vector		1 surface
+surfacelight		1	void		3 surface flex flex
+bitclear		0	int		2 int int
+bitset			0	int		2 int int
+bittest			0	int		2 int int
+getmastercog		0	cog		0
+getselfcog		0	cog		0
+heapfree		1	void		0
+heapget			0	flex		1 int
+heapnew			1	int		2 int int
+heapset			1	void		2 int flex
+loadkeyframe		0	keframe		1 string
+loadmodel		0	model		1 string
+loadsound		0	sound		1 string
+loadtemplate		0	template	1 string
+rand			0	flex		0
+reset			1	void		0
+setmastercog		1	void		1 cog
+attachthingtosurf	1	!		0
+attachthingtothing	1	void		2 thing thing
+attachthingtothingex	1	void		3 thing thing int
+capturething		1	void		1 thing
+creatething		1	thing		2 template thing
+createthingatpos	1	thing		4 template sector vector vector
+createthingatposnr	1	thing		4 template sector vector vector
+createthingnr		1	thing		2 template thing
+damagething		1	int		4 thing flex int thing
+destroything		1	void		1 thing
+detachthing		1	void		1 thing
+firstthinginview	0	thing		4 thing flex flex int
+getthinglvec		0	vector		1 thing
+getthingrvec		0	vector		1 thing
+getthinguvec		0	vector		1 thing
+ismoving		0	int		1 thing
+isthingmoving		0	int		1 thing
+isthingvisible		0	int		1 thing
+nextthinginview		0	thing		0
+releasething		1	void		1 thing
+setthinglook		1	void		2 thing vector
+teleportthing		1	void		2 thing thing
+thinglightanim		1	int		4 thing flex flex flex
+clearactorflags		1	void		2 thing int
+clearexplosionflags	1	void		2 thing int
+clearitemflags		1	void		2 thing int
+clearparticleflags	1	void		2 thing int
+clearphysicsflags	1	void		2 thing int
+clearthingattachflags	1	void		2 thing int
+clearthingflags		1	void		2 thing int
+cleartypeflags		1	void		2 thing int
+clearweaponflags	1	void		2 thing int
+getactorflags		0	int		1 thing
+getattachflags		0	int		1 thing
+getexplosionflags	0	int		1 thing
+getitemflags		0	int		1 thing
+getparticleflags	0	int		1 thing
+getphysicsflags		0	int		1 thing
+getthingattachflags	0	int		1 thing
+getthingflags		0	int		1 thing
+gettypeflags		0	int		1 thing
+getweaponflags		0	int		1 thing
+setactorflags		1	void		2 thing int
+setexplosionflags	1	void		2 thing int
+setitemflags		1	void		2 thing int
+setparticleflags	1	void		2 thing int
+setphysicsflags		1	void		2 thing int
+setthingattachflags	1	void		2 thing int
+setthingflags		1	void		2 thing int
+settypeflags		1	void		2 thing int
+setweaponflags		1	void		2 thing int
+getthingcurgeomode	0	int		1 thing
+getthingcurlightmode	0	int		1 thing
+getthingcurtexmode	0	int		1 thing
+getthinggeomode		0	int		1 thing
+getthinglightmode	0	int		1 thing
+getthingtexmode		0	int		1 thing
+setthingcurgeomode	1	void		2 thing int
+setthingcurlightmode	1	void		2 thing int
+setthingcurtexmode	1	void		2 thing int
+setthinggeomode		1	void		2 thing int
+setthinglightmode	1	void		2 thing int
+setthingtexmode		1	void		2 thing int
+getcollidetype		0	int		1 thing
+getlifeleft		0	flex		1 thing
+getthingcapturecog 	0	cog		1 thing
+getthingclasscog	0	cog		1 thing
+getthingcollidesize	0	flex		1 thing
+getthingfireoffset	0	vector		1 thing
+getthinglight		0	flex		1 thing
+getthingmass		0	flex		1 thing
+getthingmodel		0	model		1 thing
+getthingmovesize	0	flex		1 thing
+getthingparent 		0	thing		1 thing
+getthingpos 		0	vector		1 thing
+getthingrespawn		0	flex		1 thing
+getthingsector		0	sector		1 thing
+getthingsignature 	0	int		1 thing
+getthingtemplate 	0	template	1 thing
+getthingtype		0	int		1 thing
+getthinguserdata 	0	flex		1 thing
+setcollidetype		1	void		2 thing int
+setlifeleft		1	void		2 thing flex
+setthingcapturecog 	1	void		2 thing cog
+setthingclasscog	1	void		2 thing cog
+setthingcollidesize	1	void		2 thing flex
+setthingfireoffset	1	void		2 thing vector
+setthinglight		1	void		3 thing flex flex
+setthingmass		1	void		2 thing flex
+setthingmodel		1	void		2 thing model
+setthingmovesize	1	void		2 thing flex
+setthingpos		1	void		2 thing vector
+setthingtype		1	void		2 thing int
+setthinguserdata	1	void		2 thing flex
+thinglight		1	void		3 thing flex flex
+randvec			0	vector		0
+vectoradd		0	vector		2 vector vector
+vectorcross		0	vector		2 vector vector
+vectordist		0	flex		2 vector vector
+vectordot		0	flex		2 vector vector
+vectorlen		0	flex		1 vector
+vectornorm		0	vector		1 vector
+vectorscale		0	vector		2 vector flex
+vectorset		0	vector		3 flex flex flex
+vectorsub		0	vector		2 vector vector
+vectorx			0	flex		1 vector
+vectory			0	flex		1 vector
+vectorz			0	flex		1 vector
+addthingvel		1	void		2 thing vector
+applyforce		1	void		2 thing vector
+getthingrotvel		0	vector		1 thing
+getthingthrust		0	vector		1 thing
+getthingvel		0	vector		1 thing
+setthingrotvel		1	void		2 thing vector
+setthingthrust		1	void		2 thing vector
+setthingvel		1	void		2 thing vector
+stopthing		1	void		1 thing
+activatebin		1	void		3 thing flex int
+activateweapon		1	void		3 thing flex int
+assignweapon		1	void		2 thing int
+autoselectweapon	0	int		2 thing int
+changefirerate		1	void		2 thing flex
+deactivatebin		1	flex		2 thing int
+deactivateweapon	1	flex		2 thing int
+fireprojectile		1	thing		10 thing template sound int vector vector flex int flex flex
+getcurinvweapon		0	int		1 thing
+getcurweapon		0	int		1 thing
+getcurweaponmode	0	int		0
+getweaponpriority	0	int		3 thing int int
+jksetpovmodel		1	void		2 thing model
+jksetwaggle		1	void		3 thing vector flex
+jksetweaponmesh		1	void		2 thing model
+selectweapon		1	void		2 thing int
+setarmedmode		1	void		2 thing int
+setcurinvweapon		1	void		2 thing int
+setcurweapon		1	void		2 thing int
+setfirewait		1	void		2 thing flex
+setmountwait		1	void		2 thing flex
+#===================================================================
