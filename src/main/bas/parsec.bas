@@ -565,9 +565,9 @@ SUB CreateAPI
 	DIM a%
 	CLS
 
-	' This WIDTH command could be used to resize the terminal window to the
-	' correct dimensions.
-	'WIDTH 80, 25
+	'--------------- Resize Window ----------------------------------------
+
+	WIDTH 80, 25
 
 	'--------------- Print Title Bar --------------------------------------
 
