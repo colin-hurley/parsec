@@ -100,7 +100,6 @@ DECLARE FUNCTION IsValidVector% (vector$)
 
 ' FreeBASIC migration - CLEAR is not supported by FreeBASIC
 'CLEAR , , 8000
-ON ERROR GOTO HandleError
 CreateAPI
 DIM SHARED time1!
 time1! = TIMER
@@ -172,18 +171,6 @@ PrintStatus ("Cog Parse Complete.")
 MakeExit
 
 '------------------------------------------------------------------------------
-END
-
-HandleError:
-	IF ERR = 52 THEN
-		CALL PrintError(1, "Invalid file name or number.")
-	ELSEIF ERR = 53 THEN
-		CALL PrintError(1, "Cog file or data.dat not found.")
-	ELSEIF ERR = 64 THEN
-		CALL PrintError(1, "Invalid DOS file name.")
-	ELSE
-		CALL PrintError(1, "Error code" + STR$(ERR) + ". Not handled.")
-	END IF
 END
 
 REM $STATIC
@@ -1685,6 +1672,10 @@ SUB OpenCog
 	CLOSE #1
 
 	OPEN COMMAND$ FOR INPUT AS #1
+	IF EOF(1) THEN
+		CLOSE #1
+		CALL PrintError(1, "Failed to read file: " + COMMAND$)
+	END IF
 
 END SUB
 
@@ -2016,6 +2007,10 @@ SUB ReadFileData
 	DIM numVerbs%
 
 	OPEN "data.dat" FOR INPUT AS #1
+	IF EOF(1) THEN
+		CLOSE #1
+		CALL PrintError(1, "Failed to read file: data.dat")
+	END IF
 
 	numSymExts% = 0
 	numVerbs% = 0
