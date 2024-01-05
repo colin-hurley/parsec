@@ -132,17 +132,39 @@ DIM SHARED CodeMessage$(1 TO 100)
 DIM SHARED errors$(1 TO 10)
 
 'Array Pop Numbers
-DIM SHARED varCount%, numCalls%, numCM%, numLines%, errNum%
-DIM SHARED numUsedVars%, numAssignVars%, numArrayVars%
+DIM SHARED varCount%
+DIM SHARED numCalls%
+DIM SHARED numCM%
+DIM SHARED numLines%
+DIM SHARED errNum%
+DIM SHARED numUsedVars%
+DIM SHARED numAssignVars%
+DIM SHARED numArrayVars%
 
 'Shared counters and vars
-DIM SHARED lineNum%, statExec%, codeLine$
+DIM SHARED lineNum%
+DIM SHARED statExec%
+DIM SHARED codeLine$
 
 'Settings vars
-DIM SHARED aisub$, cogsub$, flexsub$, floatsub$, intsub$, keyframesub$
-DIM SHARED materialsub$, messagesub$, modelsub$, sectorsub$, surfacesub$
-DIM SHARED soundsub$, templatesub$, thingsub$, vectorsub$, allowBadFlex%
-DIM SHARED strictParse%, simArrayNames%
+DIM SHARED aisub$
+DIM SHARED cogsub$
+DIM SHARED flexsub$
+DIM SHARED floatsub$
+DIM SHARED intsub$
+DIM SHARED keyframesub$
+DIM SHARED materialsub$
+DIM SHARED messagesub$
+DIM SHARED modelsub$
+DIM SHARED sectorsub$
+DIM SHARED surfacesub$
+DIM SHARED soundsub$
+DIM SHARED templatesub$
+DIM SHARED thingsub$
+DIM SHARED vectorsub$
+DIM SHARED allowBadFlex%
+DIM SHARED strictParse%
+DIM SHARED simArrayNames%
 
 'Initialize Vars
 numCalls% = 0
@@ -1336,22 +1358,16 @@ END SUB
 
 FUNCTION GetArrayPrefix$ (codeWord$)
 
-DIM x%
-DIM charint%
+	DIM x%
+	DIM charint%
 
-FOR x% = 1 TO LEN(codeWord$)
-	charint% = ASC(MID$(codeWord$, x%, 1))
-	IF charint% >= 48 AND charint% <= 57 THEN
-		GetArrayPrefix$ = MID$(codeWord$, 1, x% - 1)
-		EXIT FOR
-	END IF
-NEXT x%
-
-
-
-
-
-
+	FOR x% = 1 TO LEN(codeWord$)
+		charint% = ASC(MID$(codeWord$, x%, 1))
+		IF charint% >= 48 AND charint% <= 57 THEN
+			GetArrayPrefix$ = MID$(codeWord$, 1, x% - 1)
+			EXIT FOR
+		END IF
+	NEXT x%
 
 END FUNCTION
 
