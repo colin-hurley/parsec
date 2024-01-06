@@ -23,6 +23,13 @@ CONST LIGHT_MAGENTA = 13
 CONST LIGHT_YELLOW = 14
 CONST WHITE = 15
 
+'----------------------- API Subs ---------------------------------------------
+DECLARE SUB CreateAPI ()
+DECLARE SUB MakeExit ()
+DECLARE SUB PrintStatus (stat$)
+DECLARE SUB PrintError (priority%, errorMsg$)
+DECLARE SUB UpdateBar ()
+
 '----------------------- Main Subs --------------------------------------------
 DECLARE SUB SkipComments ()
 DECLARE SUB CloseCog ()
@@ -31,8 +38,8 @@ DECLARE SUB ReadFileData ()
 DECLARE SUB ParseFlags ()
 DECLARE SUB ParseSymbols ()
 DECLARE SUB ParseCode ()
-DECLARE SUB Analize ()
 DECLARE SUB ParseEnd ()
+DECLARE SUB Analize ()
 
 '----------------------- Code Subs --------------------------------------------
 DECLARE SUB DoFor (codeLine$, x%)
@@ -62,24 +69,6 @@ DECLARE FUNCTION CutAtNextDelimit$ (codeLine$, x%, del$)
 DECLARE SUB FindNextChar (codeLine$, x%, multiLine%)
 DECLARE FUNCTION CheckForBlankLine% (codeLine$, x%)
 
-'----------------------- String Functions -------------------------------------
-DECLARE SUB ChopString (str1$, str2$, Length%)
-DECLARE FUNCTION Trim$ (tString$)
-
-'----------------------- Misc Subs --------------------------------------------
-DECLARE FUNCTION GetArrayPrefix$ (codeWord$)
-DECLARE FUNCTION GetVarType$ (var$)
-DECLARE FUNCTION SubType$ (theType$)
-DECLARE FUNCTION CharNum% (codeLine$, char$)
-DECLARE FUNCTION InStringArray% (sArray$(), sValue$)
-
-'----------------------- API Subs ---------------------------------------------
-DECLARE SUB CreateAPI ()
-DECLARE SUB MakeExit ()
-DECLARE SUB PrintStatus (stat$)
-DECLARE SUB PrintError (priority%, errorMsg$)
-DECLARE SUB UpdateBar ()
-
 '----------------------- Checking Subs ----------------------------------------
 DECLARE SUB CheckSymType (theType$)
 DECLARE SUB CheckSymName (theType$, theName$)
@@ -96,10 +85,19 @@ DECLARE FUNCTION IsOperator% (char$)
 DECLARE FUNCTION IsUnaryOp% (char$)
 DECLARE FUNCTION IsValidVector% (vector$)
 
+'----------------------- String Functions -------------------------------------
+DECLARE SUB ChopString (str1$, str2$, Length%)
+DECLARE FUNCTION Trim$ (tString$)
+
+'----------------------- Misc Subs --------------------------------------------
+DECLARE FUNCTION GetArrayPrefix$ (codeWord$)
+DECLARE FUNCTION GetVarType$ (var$)
+DECLARE FUNCTION SubType$ (theType$)
+DECLARE FUNCTION CharNum% (codeLine$, char$)
+DECLARE FUNCTION InStringArray% (sArray$(), sValue$)
+
 '----------------------- Misc Startup -----------------------------------------
 
-' FreeBASIC migration - CLEAR is not supported by FreeBASIC
-'CLEAR , , 8000
 CreateAPI
 DIM SHARED time1!
 time1! = TIMER
@@ -196,6 +194,640 @@ MakeExit
 END
 
 REM $STATIC
+
+SUB CreateAPI
+
+	'----------------------------------------------------------------------
+	' This sub creates the text interface for Parsec. After the API is
+	' created, UpdateBar, PrintError, and PrintStatus are used to change
+	' the information displayed through the interface.
+	'----------------------------------------------------------------------
+
+	' FreeBASIC migration - CLEAR is not supported by FreeBASIC
+	'CLEAR , , 8000
+
+	DIM a%
+	CLS
+
+	'--------------- Resize Window ----------------------------------------
+
+	WIDTH 80, 25
+
+	'--------------- Print Title Bar --------------------------------------
+
+	COLOR BLACK, LIGHT_GRAY
+	PRINT SPACE$(33); "Parsec v1.8.0"; SPACE$(34)
+
+	'--------------- Print main window ------------------------------------
+
+	COLOR LIGHT_GRAY, DARK_BLUE
+	LOCATE 2
+	PRINT CHR$(201); STRING$(78, 205); CHR$(187)
+	FOR a% = 1 TO 19
+		LOCATE 2 + a%
+		PRINT CHR$(186); SPACE$(78); CHR$(186)
+	NEXT a%
+	LOCATE 22
+	PRINT CHR$(200); STRING$(78, 205); CHR$(188)
+
+	'--------------- Print Status Bar -------------------------------------
+
+	COLOR BLACK, DARK_CYAN
+	LOCATE 23
+	PRINT STRING$(80, 32)
+
+	'--------------- Create Bar Graph Shadow ------------------------------
+
+	COLOR DARK_GRAY, BLACK
+	FOR a% = 5 TO 7
+		LOCATE a%, 17
+		PRINT SPACE$(52);
+	NEXT a%
+
+	'--------------- Create Error Box Shadow ------------------------------
+
+	FOR a% = 11 TO 18
+		LOCATE a%, 7
+		PRINT SPACE$(70);
+	NEXT a%
+
+	'--------------- Create Bar Graph -------------------------------------
+
+	COLOR BLACK, LIGHT_GRAY
+	LOCATE 4, 15
+	PRINT CHR$(201); STRING$(50, 205); CHR$(187)
+	LOCATE 5, 15
+	PRINT CHR$(186); SPACE$(1); STRING$(48, 176); SPACE$(1); CHR$(186)
+	LOCATE 6, 15
+	PRINT CHR$(200); STRING$(50, 205); CHR$(188)
+
+	'--------------- Create Error Box -------------------------------------
+
+	LOCATE 10, 5
+	PRINT CHR$(201); STRING$(4, 205); " Error Box "; STRING$(53, 205); CHR$(187)
+	FOR a% = 11 TO 16
+		LOCATE a%, 5
+		PRINT CHR$(186); SPACE$(68); CHR$(186)
+	NEXT a%
+	LOCATE 17, 5
+	PRINT CHR$(200); STRING$(68, 205); CHR$(188)
+
+END SUB
+
+SUB PrintStatus (stat$)
+
+	'----------------------------------------------------------------------
+	' This sub prints strings to the status bar of the API.
+	'----------------------------------------------------------------------
+
+	COLOR BLACK, DARK_CYAN
+	LOCATE 23, 2
+	PRINT stat$ + SPACE$(70 - LEN(stat$))
+
+END SUB
+
+SUB PrintError (priority%, errorMsg$)
+
+	'----------------------------------------------------------------------
+	' PrintError is called to print an error in the API error box. If
+	' "no errors" or "Warning" are not found in the string, then this sub
+	' will call MakeExit to end the program.
+	'----------------------------------------------------------------------
+
+	DIM extra$
+	DIM a%
+	COLOR DARK_RED, LIGHT_GRAY
+
+	errNum% = errNum% + 1
+	IF errNum% <= 6 THEN
+		IF LEN(errorMsg$) > 67 THEN
+			ChopString(errorMsg$, extra$, 67)
+			errors$(errNum%) = errorMsg$
+			errNum% = errNum% + 1
+			errors$(errNum%) = extra$
+		ELSE
+			errors$(errNum%) = errorMsg$
+		END IF
+	ELSE
+		IF LEN(errorMsg$) > 67 THEN
+			FOR a% = 1 TO 4
+				errors$(a%) = errors$(a% + 1)
+			NEXT a%
+			ChopString(errorMsg$, extra$, 67)
+			errors$(5) = errorMsg$
+			errNum% = errNum% + 1
+			errors$(6) = extra$
+		ELSE
+			FOR a% = 1 TO 5
+				errors$(a%) = errors$(a% + 1)
+			NEXT a%
+			errors$(6) = errorMsg$
+		END IF
+	END IF
+
+	FOR a% = 1 TO 6
+		LOCATE 10 + a%, 7
+		PRINT errors$(a%) + STRING$(67 - LEN(errors$(a%)), 32)
+	NEXT a%
+
+	IF errNum% >= 6 AND INSTR(errorMsg$, "Warning") < 1 AND INSTR(errorMsg$, "Parse of") < 1 AND priority% = 0 THEN
+		PrintStatus ("Too many errors in " + ReverseCutAtDelimit$(COMMAND$, LEN(COMMAND$), "\") + ". Aborting...")
+		MakeExit
+	END IF
+
+	IF priority% > 0 THEN
+		PrintStatus ("Fatal Error in " + ReverseCutAtDelimit$(COMMAND$, LEN(COMMAND$), "\") + ". Unable to continue parse.")
+		MakeExit
+	END IF
+
+END SUB
+
+SUB ChopString (str1$, str2$, Length%)
+
+	'----------------------------------------------------------------------
+	' This sub is called only by PrintError to divide a string to long to
+	' fit in the error box. ChopString finds the last space and divides the
+	' string there.
+	'----------------------------------------------------------------------
+
+	DIM x%
+	DIM char$
+
+	FOR x% = Length% TO 1 STEP -1
+		char$ = MID$(str1$, x%, 1)
+		IF char$ = " " THEN EXIT FOR
+	NEXT x%
+
+	IF x% = 1 THEN
+		COLOR BLACK, LIGHT_GRAY
+		CLS
+		PRINT "Internal Error: ChopString could not break up a solid string."
+	END IF
+
+	str2$ = MID$(str1$, x%, LEN(str1$) - x% + 1)
+	str1$ = MID$(str1$, 1, LEN(str1$) - LEN(str2$))
+	str2$ = "  " + str2$
+
+END SUB
+
+SUB UpdateBar
+
+	'----------------------------------------------------------------------
+	' This sub draws the green bar graph to show how far through the cog
+	' Parsec has gone.
+	'----------------------------------------------------------------------
+
+	DIM percent%    'percent is not scaled 0 - 100, but 0 - 48
+	DIM ratio!
+	DIM a%
+
+	ratio! = 48 / numLines%
+	percent% = CINT(lineNum% * ratio!)
+
+	COLOR DARK_GREEN, LIGHT_GRAY
+	FOR a% = 1 TO percent%
+		LOCATE 5, 16 + a%
+		PRINT CHR$(219)
+	NEXT a%
+
+END SUB
+
+SUB MakeExit
+
+	'----------------------------------------------------------------------
+	' MakeExit prints an "OK" box at the bottom of the API and waits for a
+	' key to be pressed before ending the program.
+	'----------------------------------------------------------------------
+
+	'--------------- Create Button Shadow ---------------------------------
+
+	COLOR DARK_GRAY, BLACK
+	LOCATE 20, 37
+	PRINT SPACE$(8);
+	LOCATE 21, 37
+	PRINT SPACE$(8);
+	LOCATE 22, 37
+	PRINT STRING$(8, 205)
+
+	'--------------- Create Button ----------------------------------------
+
+	COLOR BLACK, LIGHT_GRAY
+	LOCATE 19, 36
+	PRINT CHR$(201); STRING$(6, 205); CHR$(187)
+	LOCATE 20, 36
+	PRINT CHR$(186); SPACE$(2); "OK"; SPACE$(2); CHR$(186)
+	LOCATE 21, 36
+	PRINT CHR$(200); STRING$(6, 205); CHR$(188)
+
+	'--------------- Wait for key to be pressed ---------------------------
+
+	DO WHILE INKEY$ = ""
+	LOOP
+
+	'--------------- Restore original terminal colors ---------------------
+
+	COLOR LIGHT_GRAY, BLACK
+	CLS
+	END
+
+END SUB
+
+SUB ReadFileData
+
+	'----------------------------------------------------------------------
+	' This sub opens the data.dat file and stores the contained data in
+	' several global arrays.
+	'----------------------------------------------------------------------
+
+	DIM x%
+	DIM a%
+	DIM vParamNum%
+	DIM codeWord$
+	DIM numSymTypes%
+	DIM numSymExts%
+	DIM numMessages%
+	DIM numVerbs%
+
+	OPEN "data.dat" FOR INPUT AS #1
+	IF EOF(1) THEN
+		CLOSE #1
+		PrintError(1, "Failed to read file: data.dat")
+	END IF
+
+	numSymExts% = 0
+	numVerbs% = 0
+	numSymTypes% = 0
+	numMessages% = 0
+
+	DO WHILE NOT EOF(1)
+		LINE INPUT #1, codeLine$
+		codeLine$ = LCASE$(codeLine$)
+
+		IF NextCharInLine$(codeLine$, 1) <> "#" THEN
+			IF RIGHT$(codeLine$, 1) = ":" THEN
+				section$ = codeLine$
+			ELSE
+				IF section$ = "extensions:" THEN
+					numSymExts% = numSymExts% + 1
+					symExt$(numSymExts%) = codeLine$
+
+				ELSEIF section$ = "types:" THEN
+					numSymTypes% = numSymTypes% + 1
+					symType$(numSymTypes%) = codeLine$
+
+				ELSEIF section$ = "messages:" THEN
+					numMessages% = numMessages% + 1
+					message$(numMessages%) = codeLine$
+
+				ELSEIF section$ = "settings:" THEN      'Settings must be read before verbs.
+					x% = 1
+					codeWord$ = CutAtNextDelimit$(codeLine$, x%, "=")
+					x% = x% + 1
+					value$ = CutAtNextDelimit$(codeLine$, x%, "#")
+
+					IF codeWord$ = "ai" THEN
+						aisub$ = value$
+					ELSEIF codeWord$ = "cog" THEN
+						cogsub$ = value$
+					ELSEIF codeWord$ = "flex" THEN
+						flexsub$ = value$
+					ELSEIF codeWord$ = "float" THEN
+						floatsub$ = value$
+					ELSEIF codeWord$ = "int" THEN
+						intsub$ = value$
+					ELSEIF codeWord$ = "keyframe" THEN
+						keyframesub$ = value$
+					ELSEIF codeWord$ = "material" THEN
+						materialsub$ = value$
+					ELSEIF codeWord$ = "message" THEN
+						messagesub$ = value$
+					ELSEIF codeWord$ = "model" THEN
+						modelsub$ = value$
+					ELSEIF codeWord$ = "sector" THEN
+						sectorsub$ = value$
+					ELSEIF codeWord$ = "sound" THEN
+						soundsub$ = value$
+					ELSEIF codeWord$ = "surface" THEN
+						surfacesub$ = value$
+					ELSEIF codeWord$ = "template" THEN
+						templatesub$ = value$
+					ELSEIF codeWord$ = "thing" THEN
+						thingsub$ = value$
+					ELSEIF codeWord$ = "vector" THEN
+						vectorsub$ = value$
+					ELSEIF codeWord$ = "allow_bad_flexes" THEN
+						allowBadFlex% = VAL(value$)
+					ELSEIF codeWord$ = "strict_parse" THEN
+						strictParse% = VAL(value$)
+					ELSEIF codeWord$ = "sim_array_names" THEN
+						simArrayNames% = VAL(value$)
+					END IF
+
+				ELSEIF section$ = "verbs:" THEN
+					numVerbs% = numVerbs% + 1
+					x% = 1
+					verbName$(numVerbs%) = CutAtNextDelimit$(codeLine$, x%, " ")
+					verbAct%(numVerbs%) = VAL(CutAtNextDelimit$(codeLine$, x%, " "))
+					verbRet$(numVerbs%) = SubType$(CutAtNextDelimit$(codeLine$, x%, " "))
+					verbParNum$(numVerbs%) = CutAtNextDelimit$(codeLine$, x%, " #")
+					vParamNum% = VAL(verbParNum$(numVerbs%))
+					FOR a% = 1 TO vParamNum%
+						verbParam$(numVerbs%, a%) = SubType$(CutAtNextDelimit$(codeLine$, x%, " #"))
+					NEXT a%
+				END IF
+			END IF
+		END IF
+	LOOP
+	CLOSE #1
+
+END SUB
+
+SUB OpenCog
+
+	OPEN COMMAND$ FOR INPUT AS #1
+	DO WHILE NOT EOF(1)
+		LINE INPUT #1, codeLine$
+		numLines% = numLines% + 1
+	LOOP
+	CLOSE #1
+
+	OPEN COMMAND$ FOR INPUT AS #1
+	IF EOF(1) THEN
+		CLOSE #1
+		PrintError(1, "Failed to read file: " + COMMAND$)
+	END IF
+
+END SUB
+
+SUB CloseCog
+
+	CLOSE #1
+
+END SUB
+
+SUB SkipComments
+
+	DIM nextChar$
+
+	DO WHILE NOT EOF(1)
+		LINE INPUT #1, codeLine$
+		codeLine$ = LCASE$(Trim$(codeLine$))
+		lineNum% = lineNum% + 1
+		nextChar$ = NextCharInLine$(codeLine$, 1)
+		IF nextChar$ = "#" OR LEN(nextChar$) < 1 THEN
+			'trap
+		ELSEIF nextChar$ = "/" THEN
+			PrintError(0, "Garbage found on line" + STR$(lineNum%) + ". Double-slash comments are not allowed.")
+		ELSE
+			EXIT DO
+		END IF
+	LOOP
+
+END SUB
+
+SUB ParseFlags
+
+	'----------------------------------------------------------------------
+	' This sub is called to parse a cog's flags assingment. If the cog is
+	' not using any, then ParseFlags will exit back to the calling sub.
+	'----------------------------------------------------------------------
+
+	IF MID$(Trim$(codeLine$), 1, 5) <> "flags" THEN EXIT SUB
+	PrintStatus ("Parsing Cog Flags.")
+
+	DIM x%
+	DIM flagVal$
+	DIM lastBreak%
+	x% = 1
+
+	GetToNextChar(codeLine$, x%)       'get to the "f" in flags.
+	x% = x% + 5      'get past the "flags"
+
+	lastBreak% = x%
+	GetToNextChar(codeLine$, x%)
+	IF x% > lastBreak% THEN PrintError(0, "An = was expected after the flags assignment on line" + STR$(lineNum%) + ". Spaces are not allowed.")
+	IF NextCharInLine(codeLine$, x%) <> "=" THEN PrintError(1, "An = was expected after the flags assignment on line" + STR$(lineNum%) + ".")
+
+	x% = x% + 1      'get past the "="
+	IF x% > LEN(codeLine$) THEN PrintError(1, "Integer expected after the flags assignment on line" + STR$(lineNum%) + ".")
+
+	lastBreak% = x%
+	GetToNextChar(codeLine$, x%)
+	IF x% > lastBreak% THEN PrintError(0, "Integer expected after the flags assignment on line" + STR$(lineNum%) + ". Spaces are not allowed.")
+
+	flagVal$ = CutAtNextDelimit(codeLine$, x%, " #//")
+	IF IsValidInt%(flagVal$) = 0 THEN PrintError(0, "The flags assignment on line" + STR$(lineNum%) + " has an invalid integer value.")
+	IF CutAtNextDelimit(codeLine$, x%, "#//") <> "" THEN PrintError(0, "Garbage found after the flags assignment on line" + STR$(lineNum%))
+	
+	SkipComments
+END SUB
+
+SUB ParseSymbols
+
+	'----------------------------------------------------------------------
+	' ParseSymbols parses the symbol lines between the beginning and end of
+	' the symbols section. Each variable is checked with several subs to
+	' make sure that it's valid. ParseSymbols records each variable that it
+	' finds. When a variable is found in the code section, it will be
+	' checked to see if it was declared.
+	'----------------------------------------------------------------------
+
+	DIM codeWord$
+	DIM x%
+	x% = 1
+
+	codeWord$ = CutAtNextDelimit(codeLine$, x%, " #")
+	IF codeWord$ <> "symbols" THEN PrintError(1, "Symbols beginning expected on line" + STR$(lineNum%) + ".")
+	IF CheckForBlankLine(codeLine$, x%) = 0 THEN PrintError(0, "Garbage found after beginning of symbols section on line" + STR$(lineNum%) + ".")
+
+	PrintStatus ("Parsing Defined Variables.")
+
+	DIM a%
+	DIM theType$
+	DIM realType$
+	DIM theName$
+	DIM initVal$
+	DIM extVal$(1 TO 5)
+	DIM isBlank%
+	DIM exten$(1 TO 5)
+	DIM extCount%
+	DIM EOL%
+	varCount% = 0
+	EOL% = 0
+
+	DO WHILE NOT EOF(1)
+		LINE INPUT #1, codeLine$
+		codeLine$ = LCASE$(codeLine$)
+		lineNum% = lineNum% + 1
+		IF CutAtNextDelimit(codeLine$, 1, " #//") = "end" OR CutAtNextDelimit(codeLine$, 1, " #//") = "code" THEN EXIT DO
+
+		isBlank% = CheckForBlankLine%(codeLine$, 1)
+		IF isBlank% = 0 THEN
+			'--------- Reset Vars ---------------------------------
+			theType$ = "null"
+			theName$ = "null"
+			initVal$ = "null"
+			extCount% = 0
+			EOL% = 0
+			FOR a% = 1 TO 5
+				extVal$(a%) = "null"
+				exten$(a%) = "null"
+			NEXT a%
+
+			'--------- Main Symbol Parser -------------------------
+			x% = 1
+			theType$ = CutAtNextDelimit$(codeLine$, x%, " ")
+			IF x% >= LEN(codeLine$) THEN
+				PrintError(0, "Invalid symbol definition on line" + STR$(lineNum%) + ". Skipping symbol.")
+				EOL% = 1
+			END IF
+			
+			theName$ = CutAtNextDelimit$(codeLine$, x%, " =#//")
+
+			IF EOL% = 0 THEN
+				GetToNextChar(codeLine$, x%)
+				IF MID$(codeLine$, x%, 1) = "=" THEN
+					x% = x% + 1
+					initVal$ = CutAtNextDelimit$(codeLine$, x%, " #//")
+				END IF
+			END IF
+
+			DO WHILE x% <= LEN(codeLine$) AND CheckForBlankLine%(codeLine$, x%) = 0 AND EOL% = 0
+				extCount% = extCount% + 1
+				exten$(extCount%) = CutAtNextDelimit$(codeLine$, x%, " =,#//")
+				GetToNextChar(codeLine$, x%)
+				IF MID$(codeLine$, x%, 1) = "=" THEN
+					x% = x% + 1
+					extVal$(extCount%) = CutAtNextDelimit$(codeLine$, x%, " ,#//")
+				END IF
+				IF MID$(codeLine$, x%, 1) = "," THEN
+					x% = x% + 1     'get past the comma
+					IF CheckForBlankLine%(codeLine$, x%) = 1 THEN PrintError(0, "Another symbol extension expected on line" + STR$(lineNum%) + ", but none found.")
+				END IF
+			LOOP
+
+			'--------- Check Symbol -------------------------------
+
+			IF EOL% = 0 THEN
+
+			CheckSymType(theType$)
+			CheckSymName(theType$, theName$)
+			CheckSymVal(theType$, initVal$)
+			FOR a% = 1 TO extCount%
+				CheckSymExt(theType$, exten$(a%), extVal$(a%))
+			NEXT a%
+			CheckForExtConflict(exten$(), extCount%)
+
+			'--------- Substitute Type ----------------------------
+
+			realType$ = theType$
+			theType$ = SubType$(theType$)
+
+			'--------- Record Variable ----------------------------
+
+			varCount% = varCount% + 1
+			varName$(varCount%) = theName$
+			varType$(varCount%) = theType$
+
+			IF InStringArray%(exten$(), "local") = 0 THEN
+				IF realType$ = "sector" OR realType$ = "surface" OR realType$ = "thing" THEN varConst$(varCount%) = theName$
+				numAssignVars% = numAssignVars% + 1
+				assignVar$(numAssignVars%) = theName$
+			ELSEIF initVal$ <> "null" THEN
+				numAssignVars% = numAssignVars% + 1
+				assignVar$(numAssignVars%) = theName$
+			END IF
+
+			END IF  'for EOL check
+		END IF
+		UpdateBar
+	LOOP
+
+	x% = 1
+	codeWord$ = CutAtNextDelimit(codeLine$, x%, " #")
+	IF codeWord$ <> "end" THEN PrintError(1, "No end to the symbols section.")
+	IF CheckForBlankLine(codeLine$, x%) = 0 THEN PrintError(0, "Garbage found after end of the symbols section on line" + STR$(lineNum%) + ".")
+	
+END SUB
+
+SUB ParseCode
+
+	'----------------------------------------------------------------------
+	' ParseCode starts inside the code section and looks for messages. When
+	' it finds one, it calls DoMessage to parse it.
+	'----------------------------------------------------------------------
+
+	DIM codeWord$
+	DIM lastBreak%
+	DIM x%
+	DIM message$
+	x% = 1
+
+	codeWord$ = CutAtNextDelimit(codeLine$, x%, " #")
+	IF codeWord$ <> "code" THEN PrintError(1, "Code section beginning expected on line" + STR$(lineNum%) + ".")
+	IF CheckForBlankLine(codeLine$, x%) = 0 THEN PrintError(0, "Garbage found after beginning of code section on line" + STR$(lineNum%) + ".")
+
+	PrintStatus ("Parsing Code Section.")
+
+	DO WHILE NOT EOF(1)
+		LINE INPUT #1, codeLine$
+		codeLine$ = LCASE$(codeLine$)
+		lineNum% = lineNum% + 1
+		x% = 1
+		IF CutAtNextDelimit(codeLine$, x%, " #//") = "end" THEN EXIT DO
+		x% = 1
+		DO WHILE x% <= LEN(codeLine$) AND CheckForBlankLine%(codeLine$, x%) = 0
+			lastBreak% = x%
+			message$ = CutAtNextDelimit$(codeLine$, x%, ":")
+			IF IsValidName%(message$) = 1 AND MID$(codeLine$, x%, 1) = ":" THEN
+				IF InStringArray%(CodeMessage$(), message$) > 0 THEN PrintError(0, "The message, " + message$ + ", on line" + STR$(lineNum%) + " has already been used in the code section.")
+				PrintStatus ("Parsing message, " + message$ + ".")
+				numCM% = numCM% + 1
+				CodeMessage$(numCM%) = message$
+				numUsedVars% = numUsedVars% + 1
+				usedVar$(numUsedVars%) = message$
+				x% = x% + 1     'get past the ":"
+				DoMessage(codeLine$, x%, message$)
+			ELSE
+				x% = lastBreak%
+				PrintError(1, "Message expected, but " + CutAtNextDelimit$(message$, 1, " :#//") + " found on line" + STR$(lineNum%) + ".")
+			END IF
+			
+		LOOP
+	LOOP
+
+	'Note below that Parsec does not allow double-slash comments directly
+	'after the 'end'. Since JK doesn't read beyond the end of the code,
+	'it isn't aware of the comment. It's overkill, but it enforces the
+	'rule: no double-slash comments outside of the code or symbols sections.
+	
+	x% = 1
+	codeWord$ = CutAtNextDelimit(codeLine$, x%, " #")
+	IF codeWord$ <> "end" THEN PrintError(1, "No end to the code section.")
+	IF CheckForBlankLine(codeLine$, x%) = 0 THEN PrintError(0, "Garbage found after end of code section on line" + STR$(lineNum%) + ".")
+
+END SUB
+
+SUB ParseEnd
+
+	DIM nextChar$
+
+	DO WHILE NOT EOF(1)
+		LINE INPUT #1, codeLine$
+		codeLine$ = LCASE$(Trim$(codeLine$))
+		lineNum% = lineNum% + 1
+		nextChar$ = NextCharInLine$(codeLine$, 1)
+		IF nextChar$ = "#" OR LEN(nextChar$) < 1 THEN
+			'trap
+		ELSEIF nextChar$ = "/" THEN
+			PrintError(0, "Garbage found on line" + STR$(lineNum%) + ". Double-slash comments are not allowed.")
+		ELSE
+			PrintError(0, "Garbage found on line" + STR$(lineNum%) + ".")
+		END IF
+	LOOP
+
+END SUB
+
 SUB Analize
 
 	'----------------------------------------------------------------------
@@ -273,17 +905,107 @@ SUB Analize
 
 END SUB
 
-FUNCTION CharNum% (codeLine$, char$)
+SUB GetToNextChar (codeLine$, x%)
 
-	DIM x%
-	DIM count%
-	count% = 0
+	'----------------------------------------------------------------------
+	' This sub parses through a string starting at a given pos. It returns
+	' the pos of the next non-space character.
+	'----------------------------------------------------------------------
 
-	FOR x% = 1 TO LEN(codeLine$)
-		IF MID$(codeLine$, x%, 1) = char$ THEN count% = count% + 1
-	NEXT x%
+	DIM char$
+	' FreeBASIC migration - Use local iterator variable to avoid "error 51: Expected scalar counter..."
+	DIM itr%
+	FOR itr% = x% TO LEN(codeLine$)
+		x% = itr%
+		char$ = MID$(codeLine$, x%, 1)
+		IF char$ <> " " AND char$ <> CHR$(9) THEN EXIT FOR
+	NEXT itr%
+	x% = itr%
 
-	CharNum% = count%
+END SUB
+
+FUNCTION NextCharInLine$ (codeLine$, x%)
+
+	GetToNextChar(codeLine$, x%)
+	NextCharInLine$ = MID$(codeLine$, x%, 1)
+
+END FUNCTION
+
+SUB GetToNextDelimit (codeLine$, x%, del$)
+
+	'----------------------------------------------------------------------
+	' This sub parses through a string looking for the next character that
+	' the calling function identified as a delimiter.
+	'----------------------------------------------------------------------
+
+	DIM char$
+	' FreeBASIC migration - Use local iterator variable to avoid "error 51: Expected scalar counter..."
+	DIM itr%
+	FOR itr% = x% TO LEN(codeLine$)
+		x% = itr%
+		char$ = MID$(codeLine$, x%, 1)
+		IF INSTR(del$, char$) > 0 THEN EXIT FOR
+		IF INSTR(del$, " ") > 0 AND char$ = CHR$(9) THEN EXIT FOR
+	NEXT itr%
+	x% = itr%
+
+END SUB
+
+FUNCTION CutAtNextDelimit$ (codeLine$, x%, del$)
+
+	'----------------------------------------------------------------------
+	' This is a main parsing function designed to "cut" a codeWord out out
+	' of a string. First it gets to the next non-space character. Then, it
+	' gets to the next character in the string that's in the del$ string.
+	' The characters between these two points will be returned as the
+	' codeWord.
+	'----------------------------------------------------------------------
+
+	DIM lastBreak%
+	DIM char$
+
+	GetToNextChar(codeLine$, x%)
+	lastBreak% = x%
+
+	' FreeBASIC migration - Use local iterator variable to avoid "error 51: Expected scalar counter..."
+	DIM itr%
+	FOR itr% = x% TO LEN(codeLine$)
+		x% = itr%
+		char$ = MID$(codeLine$, x%, 1)
+		IF MID$(codeLine$, x%, 2) = "//" THEN
+			IF CharNum%(del$, "/") > 1 THEN EXIT FOR
+		ELSEIF char$ = "/" THEN
+			IF CharNum%(del$, "/") = 1 OR CharNum%(del$, "/") > 2 THEN EXIT FOR
+		ELSEIF INSTR(del$, char$) > 0 THEN
+			EXIT FOR
+		ELSEIF INSTR(del$, " ") > 0 AND char$ = CHR$(9) THEN
+			EXIT FOR
+		END IF
+	NEXT itr%
+	x% = itr%
+
+	CutAtNextDelimit$ = Trim$(MID$(codeLine$, lastBreak%, x% - lastBreak%))
+
+END FUNCTION
+
+FUNCTION ReverseCutAtDelimit$ (codeLine$, x%, del$)
+
+	'This function does not feature the
+	'intuitive delimiter-guessing that
+	'the original CAND has.
+
+	DIM lastBreak%
+	lastBreak% = x%
+	
+	' FreeBASIC migration - Use local iterator variable to avoid "error 51: Expected scalar counter..."
+	DIM itr%
+	FOR itr% = x% TO 1 STEP -1
+		x% = itr%
+		IF INSTR(del$, MID$(codeLine$, x%, 1)) > 0 THEN EXIT FOR
+	NEXT itr%
+	x% = itr%
+
+	ReverseCutAtDelimit$ = LCASE$(Trim$(MID$(codeLine$, x% + 1, lastBreak%)))
 
 END FUNCTION
 
@@ -528,153 +1250,6 @@ SUB CheckSymVal (theType$, initVal$)
 	END IF
 
 END SUB
-
-SUB ChopString (str1$, str2$, Length%)
-
-	'----------------------------------------------------------------------
-	' This sub is called only by PrintError to divide a string to long to
-	' fit in the error box. ChopString finds the last space and divides the
-	' string there.
-	'----------------------------------------------------------------------
-
-	DIM x%
-	DIM char$
-
-	FOR x% = Length% TO 1 STEP -1
-		char$ = MID$(str1$, x%, 1)
-		IF char$ = " " THEN EXIT FOR
-	NEXT x%
-
-	IF x% = 1 THEN
-		COLOR BLACK, LIGHT_GRAY
-		CLS
-		PRINT "Internal Error: ChopString could not break up a solid string."
-	END IF
-
-	str2$ = MID$(str1$, x%, LEN(str1$) - x% + 1)
-	str1$ = MID$(str1$, 1, LEN(str1$) - LEN(str2$))
-	str2$ = "  " + str2$
-
-END SUB
-
-SUB CloseCog
-
-	CLOSE #1
-
-END SUB
-
-SUB CreateAPI
-
-	'----------------------------------------------------------------------
-	' This sub creates the text interface for Parsec. After the API is
-	' created, UpdateBar, PrintError, and PrintStatus are used to change
-	' the information displayed through the interface.
-	'----------------------------------------------------------------------
-
-	DIM a%
-	CLS
-
-	'--------------- Resize Window ----------------------------------------
-
-	WIDTH 80, 25
-
-	'--------------- Print Title Bar --------------------------------------
-
-	COLOR BLACK, LIGHT_GRAY
-	PRINT SPACE$(33); "Parsec v1.8.0"; SPACE$(34)
-
-	'--------------- Print main window ------------------------------------
-
-	COLOR LIGHT_GRAY, DARK_BLUE
-	LOCATE 2
-	PRINT CHR$(201); STRING$(78, 205); CHR$(187)
-	FOR a% = 1 TO 19
-		LOCATE 2 + a%
-		PRINT CHR$(186); SPACE$(78); CHR$(186)
-	NEXT a%
-	LOCATE 22
-	PRINT CHR$(200); STRING$(78, 205); CHR$(188)
-
-	'--------------- Print Status Bar -------------------------------------
-
-	COLOR BLACK, DARK_CYAN
-	LOCATE 23
-	PRINT STRING$(80, 32)
-
-	'--------------- Create Bar Graph Shadow ------------------------------
-
-	COLOR DARK_GRAY, BLACK
-	FOR a% = 5 TO 7
-		LOCATE a%, 17
-		PRINT SPACE$(52);
-	NEXT a%
-
-	'--------------- Create Error Box Shadow ------------------------------
-
-	FOR a% = 11 TO 18
-		LOCATE a%, 7
-		PRINT SPACE$(70);
-	NEXT a%
-
-	'--------------- Create Bar Graph -------------------------------------
-
-	COLOR BLACK, LIGHT_GRAY
-	LOCATE 4, 15
-	PRINT CHR$(201); STRING$(50, 205); CHR$(187)
-	LOCATE 5, 15
-	PRINT CHR$(186); SPACE$(1); STRING$(48, 176); SPACE$(1); CHR$(186)
-	LOCATE 6, 15
-	PRINT CHR$(200); STRING$(50, 205); CHR$(188)
-
-	'--------------- Create Error Box -------------------------------------
-
-	LOCATE 10, 5
-	PRINT CHR$(201); STRING$(4, 205); " Error Box "; STRING$(53, 205); CHR$(187)
-	FOR a% = 11 TO 16
-		LOCATE a%, 5
-		PRINT CHR$(186); SPACE$(68); CHR$(186)
-	NEXT a%
-	LOCATE 17, 5
-	PRINT CHR$(200); STRING$(68, 205); CHR$(188)
-
-END SUB
-
-FUNCTION CutAtNextDelimit$ (codeLine$, x%, del$)
-
-	'----------------------------------------------------------------------
-	' This is a main parsing function designed to "cut" a codeWord out out
-	' of a string. First it gets to the next non-space character. Then, it
-	' gets to the next character in the string that's in the del$ string.
-	' The characters between these two points will be returned as the
-	' codeWord.
-	'----------------------------------------------------------------------
-
-	DIM lastBreak%
-	DIM char$
-
-	GetToNextChar(codeLine$, x%)
-	lastBreak% = x%
-
-	' FreeBASIC migration - Use local iterator variable to avoid "error 51: Expected scalar counter..."
-	DIM itr%
-	FOR itr% = x% TO LEN(codeLine$)
-		x% = itr%
-		char$ = MID$(codeLine$, x%, 1)
-		IF MID$(codeLine$, x%, 2) = "//" THEN
-			IF CharNum%(del$, "/") > 1 THEN EXIT FOR
-		ELSEIF char$ = "/" THEN
-			IF CharNum%(del$, "/") = 1 OR CharNum%(del$, "/") > 2 THEN EXIT FOR
-		ELSEIF INSTR(del$, char$) > 0 THEN
-			EXIT FOR
-		ELSEIF INSTR(del$, " ") > 0 AND char$ = CHR$(9) THEN
-			EXIT FOR
-		END IF
-	NEXT itr%
-	x% = itr%
-
-	CutAtNextDelimit$ = Trim$(MID$(codeLine$, lastBreak%, x% - lastBreak%))
-
-END FUNCTION
 
 SUB DoAssignment (codeLine$, x%, del$)
 
@@ -1371,45 +1946,6 @@ FUNCTION GetArrayPrefix$ (codeWord$)
 
 END FUNCTION
 
-SUB GetToNextChar (codeLine$, x%)
-
-	'----------------------------------------------------------------------
-	' This sub parses through a string starting at a given pos. It returns
-	' the pos of the next non-space character.
-	'----------------------------------------------------------------------
-
-	DIM char$
-	' FreeBASIC migration - Use local iterator variable to avoid "error 51: Expected scalar counter..."
-	DIM itr%
-	FOR itr% = x% TO LEN(codeLine$)
-		x% = itr%
-		char$ = MID$(codeLine$, x%, 1)
-		IF char$ <> " " AND char$ <> CHR$(9) THEN EXIT FOR
-	NEXT itr%
-	x% = itr%
-
-END SUB
-
-SUB GetToNextDelimit (codeLine$, x%, del$)
-
-	'----------------------------------------------------------------------
-	' This sub parses through a string looking for the next character that
-	' the calling function identified as a delimiter.
-	'----------------------------------------------------------------------
-
-	DIM char$
-	' FreeBASIC migration - Use local iterator variable to avoid "error 51: Expected scalar counter..."
-	DIM itr%
-	FOR itr% = x% TO LEN(codeLine$)
-		x% = itr%
-		char$ = MID$(codeLine$, x%, 1)
-		IF INSTR(del$, char$) > 0 THEN EXIT FOR
-		IF INSTR(del$, " ") > 0 AND char$ = CHR$(9) THEN EXIT FOR
-	NEXT itr%
-	x% = itr%
-
-END SUB
-
 FUNCTION GetVarType$ (var$)
 
 	'----------------------------------------------------------------------
@@ -1425,25 +1961,6 @@ FUNCTION GetVarType$ (var$)
 			EXIT FOR
 		END IF
 	NEXT a%
-
-END FUNCTION
-
-FUNCTION InStringArray% (sArray$(), sValue$)
-
-	'----------------------------------------------------------------------
-	' This function was created to search a string array for a certain
-	' value. This avoids having too much array-searching code.
-	'----------------------------------------------------------------------
-
-	DIM a%
-	FOR a% = 1 TO UBOUND(sArray$, 1)
-		IF sValue$ = sArray$(a%) THEN
-			InStringArray% = a%
-			EXIT FUNCTION
-		END IF
-	NEXT a%
-
-	InStringArray% = 0
 
 END FUNCTION
 
@@ -1631,532 +2148,6 @@ FUNCTION IsValidVector% (vector$)
 
 END FUNCTION
 
-SUB MakeExit
-
-	'----------------------------------------------------------------------
-	' MakeExit prints an "OK" box at the bottom of the API and waits for a
-	' key to be pressed before ending the program.
-	'----------------------------------------------------------------------
-
-	'--------------- Create Button Shadow ---------------------------------
-
-	COLOR DARK_GRAY, BLACK
-	LOCATE 20, 37
-	PRINT SPACE$(8);
-	LOCATE 21, 37
-	PRINT SPACE$(8);
-	LOCATE 22, 37
-	PRINT STRING$(8, 205)
-
-	'--------------- Create Button ----------------------------------------
-
-	COLOR BLACK, LIGHT_GRAY
-	LOCATE 19, 36
-	PRINT CHR$(201); STRING$(6, 205); CHR$(187)
-	LOCATE 20, 36
-	PRINT CHR$(186); SPACE$(2); "OK"; SPACE$(2); CHR$(186)
-	LOCATE 21, 36
-	PRINT CHR$(200); STRING$(6, 205); CHR$(188)
-
-	'--------------- Wait for key to be pressed ---------------------------
-
-	DO WHILE INKEY$ = ""
-	LOOP
-
-	'--------------- Restore original terminal colors ---------------------
-
-	COLOR LIGHT_GRAY, BLACK
-	CLS
-	END
-
-END SUB
-
-FUNCTION NextCharInLine$ (codeLine$, x%)
-
-	GetToNextChar(codeLine$, x%)
-	NextCharInLine$ = MID$(codeLine$, x%, 1)
-
-END FUNCTION
-
-SUB OpenCog
-
-	OPEN COMMAND$ FOR INPUT AS #1
-	DO WHILE NOT EOF(1)
-		LINE INPUT #1, codeLine$
-		numLines% = numLines% + 1
-	LOOP
-	CLOSE #1
-
-	OPEN COMMAND$ FOR INPUT AS #1
-	IF EOF(1) THEN
-		CLOSE #1
-		PrintError(1, "Failed to read file: " + COMMAND$)
-	END IF
-
-END SUB
-
-SUB ParseCode
-
-	'----------------------------------------------------------------------
-	' ParseCode starts inside the code section and looks for messages. When
-	' it finds one, it calls DoMessage to parse it.
-	'----------------------------------------------------------------------
-
-	DIM codeWord$
-	DIM lastBreak%
-	DIM x%
-	DIM message$
-	x% = 1
-
-	codeWord$ = CutAtNextDelimit(codeLine$, x%, " #")
-	IF codeWord$ <> "code" THEN PrintError(1, "Code section beginning expected on line" + STR$(lineNum%) + ".")
-	IF CheckForBlankLine(codeLine$, x%) = 0 THEN PrintError(0, "Garbage found after beginning of code section on line" + STR$(lineNum%) + ".")
-
-	PrintStatus ("Parsing Code Section.")
-
-	DO WHILE NOT EOF(1)
-		LINE INPUT #1, codeLine$
-		codeLine$ = LCASE$(codeLine$)
-		lineNum% = lineNum% + 1
-		x% = 1
-		IF CutAtNextDelimit(codeLine$, x%, " #//") = "end" THEN EXIT DO
-		x% = 1
-		DO WHILE x% <= LEN(codeLine$) AND CheckForBlankLine%(codeLine$, x%) = 0
-			lastBreak% = x%
-			message$ = CutAtNextDelimit$(codeLine$, x%, ":")
-			IF IsValidName%(message$) = 1 AND MID$(codeLine$, x%, 1) = ":" THEN
-				IF InStringArray%(CodeMessage$(), message$) > 0 THEN PrintError(0, "The message, " + message$ + ", on line" + STR$(lineNum%) + " has already been used in the code section.")
-				PrintStatus ("Parsing message, " + message$ + ".")
-				numCM% = numCM% + 1
-				CodeMessage$(numCM%) = message$
-				numUsedVars% = numUsedVars% + 1
-				usedVar$(numUsedVars%) = message$
-				x% = x% + 1     'get past the ":"
-				DoMessage(codeLine$, x%, message$)
-			ELSE
-				x% = lastBreak%
-				PrintError(1, "Message expected, but " + CutAtNextDelimit$(message$, 1, " :#//") + " found on line" + STR$(lineNum%) + ".")
-			END IF
-			
-		LOOP
-	LOOP
-
-	'Note below that Parsec does not allow double-slash comments directly
-	'after the 'end'. Since JK doesn't read beyond the end of the code,
-	'it isn't aware of the comment. It's overkill, but it enforces the
-	'rule: no double-slash comments outside of the code or symbols sections.
-	
-	x% = 1
-	codeWord$ = CutAtNextDelimit(codeLine$, x%, " #")
-	IF codeWord$ <> "end" THEN PrintError(1, "No end to the code section.")
-	IF CheckForBlankLine(codeLine$, x%) = 0 THEN PrintError(0, "Garbage found after end of code section on line" + STR$(lineNum%) + ".")
-
-END SUB
-
-SUB ParseEnd
-
-	DIM nextChar$
-
-	DO WHILE NOT EOF(1)
-		LINE INPUT #1, codeLine$
-		codeLine$ = LCASE$(Trim$(codeLine$))
-		lineNum% = lineNum% + 1
-		nextChar$ = NextCharInLine$(codeLine$, 1)
-		IF nextChar$ = "#" OR LEN(nextChar$) < 1 THEN
-			'trap
-		ELSEIF nextChar$ = "/" THEN
-			PrintError(0, "Garbage found on line" + STR$(lineNum%) + ". Double-slash comments are not allowed.")
-		ELSE
-			PrintError(0, "Garbage found on line" + STR$(lineNum%) + ".")
-		END IF
-	LOOP
-
-END SUB
-
-SUB ParseFlags
-
-	'----------------------------------------------------------------------
-	' This sub is called to parse a cog's flags assingment. If the cog is
-	' not using any, then ParseFlags will exit back to the calling sub.
-	'----------------------------------------------------------------------
-
-	IF MID$(Trim$(codeLine$), 1, 5) <> "flags" THEN EXIT SUB
-	PrintStatus ("Parsing Cog Flags.")
-
-	DIM x%
-	DIM flagVal$
-	DIM lastBreak%
-	x% = 1
-
-	GetToNextChar(codeLine$, x%)       'get to the "f" in flags.
-	x% = x% + 5      'get past the "flags"
-
-	lastBreak% = x%
-	GetToNextChar(codeLine$, x%)
-	IF x% > lastBreak% THEN PrintError(0, "An = was expected after the flags assignment on line" + STR$(lineNum%) + ". Spaces are not allowed.")
-	IF NextCharInLine(codeLine$, x%) <> "=" THEN PrintError(1, "An = was expected after the flags assignment on line" + STR$(lineNum%) + ".")
-
-	x% = x% + 1      'get past the "="
-	IF x% > LEN(codeLine$) THEN PrintError(1, "Integer expected after the flags assignment on line" + STR$(lineNum%) + ".")
-
-	lastBreak% = x%
-	GetToNextChar(codeLine$, x%)
-	IF x% > lastBreak% THEN PrintError(0, "Integer expected after the flags assignment on line" + STR$(lineNum%) + ". Spaces are not allowed.")
-
-	flagVal$ = CutAtNextDelimit(codeLine$, x%, " #//")
-	IF IsValidInt%(flagVal$) = 0 THEN PrintError(0, "The flags assignment on line" + STR$(lineNum%) + " has an invalid integer value.")
-	IF CutAtNextDelimit(codeLine$, x%, "#//") <> "" THEN PrintError(0, "Garbage found after the flags assignment on line" + STR$(lineNum%))
-	
-	SkipComments
-END SUB
-
-SUB ParseSymbols
-
-	'----------------------------------------------------------------------
-	' ParseSymbols parses the symbol lines between the beginning and end of
-	' the symbols section. Each variable is checked with several subs to
-	' make sure that it's valid. ParseSymbols records each variable that it
-	' finds. When a variable is found in the code section, it will be
-	' checked to see if it was declared.
-	'----------------------------------------------------------------------
-
-	DIM codeWord$
-	DIM x%
-	x% = 1
-
-	codeWord$ = CutAtNextDelimit(codeLine$, x%, " #")
-	IF codeWord$ <> "symbols" THEN PrintError(1, "Symbols beginning expected on line" + STR$(lineNum%) + ".")
-	IF CheckForBlankLine(codeLine$, x%) = 0 THEN PrintError(0, "Garbage found after beginning of symbols section on line" + STR$(lineNum%) + ".")
-
-	PrintStatus ("Parsing Defined Variables.")
-
-	DIM a%
-	DIM theType$
-	DIM realType$
-	DIM theName$
-	DIM initVal$
-	DIM extVal$(1 TO 5)
-	DIM isBlank%
-	DIM exten$(1 TO 5)
-	DIM extCount%
-	DIM EOL%
-	varCount% = 0
-	EOL% = 0
-
-	DO WHILE NOT EOF(1)
-		LINE INPUT #1, codeLine$
-		codeLine$ = LCASE$(codeLine$)
-		lineNum% = lineNum% + 1
-		IF CutAtNextDelimit(codeLine$, 1, " #//") = "end" OR CutAtNextDelimit(codeLine$, 1, " #//") = "code" THEN EXIT DO
-
-		isBlank% = CheckForBlankLine%(codeLine$, 1)
-		IF isBlank% = 0 THEN
-			'--------- Reset Vars ---------------------------------
-			theType$ = "null"
-			theName$ = "null"
-			initVal$ = "null"
-			extCount% = 0
-			EOL% = 0
-			FOR a% = 1 TO 5
-				extVal$(a%) = "null"
-				exten$(a%) = "null"
-			NEXT a%
-
-			'--------- Main Symbol Parser -------------------------
-			x% = 1
-			theType$ = CutAtNextDelimit$(codeLine$, x%, " ")
-			IF x% >= LEN(codeLine$) THEN
-				PrintError(0, "Invalid symbol definition on line" + STR$(lineNum%) + ". Skipping symbol.")
-				EOL% = 1
-			END IF
-			
-			theName$ = CutAtNextDelimit$(codeLine$, x%, " =#//")
-
-			IF EOL% = 0 THEN
-				GetToNextChar(codeLine$, x%)
-				IF MID$(codeLine$, x%, 1) = "=" THEN
-					x% = x% + 1
-					initVal$ = CutAtNextDelimit$(codeLine$, x%, " #//")
-				END IF
-			END IF
-
-			DO WHILE x% <= LEN(codeLine$) AND CheckForBlankLine%(codeLine$, x%) = 0 AND EOL% = 0
-				extCount% = extCount% + 1
-				exten$(extCount%) = CutAtNextDelimit$(codeLine$, x%, " =,#//")
-				GetToNextChar(codeLine$, x%)
-				IF MID$(codeLine$, x%, 1) = "=" THEN
-					x% = x% + 1
-					extVal$(extCount%) = CutAtNextDelimit$(codeLine$, x%, " ,#//")
-				END IF
-				IF MID$(codeLine$, x%, 1) = "," THEN
-					x% = x% + 1     'get past the comma
-					IF CheckForBlankLine%(codeLine$, x%) = 1 THEN PrintError(0, "Another symbol extension expected on line" + STR$(lineNum%) + ", but none found.")
-				END IF
-			LOOP
-
-			'--------- Check Symbol -------------------------------
-
-			IF EOL% = 0 THEN
-
-			CheckSymType(theType$)
-			CheckSymName(theType$, theName$)
-			CheckSymVal(theType$, initVal$)
-			FOR a% = 1 TO extCount%
-				CheckSymExt(theType$, exten$(a%), extVal$(a%))
-			NEXT a%
-			CheckForExtConflict(exten$(), extCount%)
-
-			'--------- Substitute Type ----------------------------
-
-			realType$ = theType$
-			theType$ = SubType$(theType$)
-
-			'--------- Record Variable ----------------------------
-
-			varCount% = varCount% + 1
-			varName$(varCount%) = theName$
-			varType$(varCount%) = theType$
-
-			IF InStringArray%(exten$(), "local") = 0 THEN
-				IF realType$ = "sector" OR realType$ = "surface" OR realType$ = "thing" THEN varConst$(varCount%) = theName$
-				numAssignVars% = numAssignVars% + 1
-				assignVar$(numAssignVars%) = theName$
-			ELSEIF initVal$ <> "null" THEN
-				numAssignVars% = numAssignVars% + 1
-				assignVar$(numAssignVars%) = theName$
-			END IF
-
-			END IF  'for EOL check
-		END IF
-		UpdateBar
-	LOOP
-
-	x% = 1
-	codeWord$ = CutAtNextDelimit(codeLine$, x%, " #")
-	IF codeWord$ <> "end" THEN PrintError(1, "No end to the symbols section.")
-	IF CheckForBlankLine(codeLine$, x%) = 0 THEN PrintError(0, "Garbage found after end of the symbols section on line" + STR$(lineNum%) + ".")
-	
-END SUB
-
-SUB PrintError (priority%, errorMsg$)
-
-	'----------------------------------------------------------------------
-	' PrintError is called to print an error in the API error box. If
-	' "no errors" or "Warning" are not found in the string, then this sub
-	' will call MakeExit to end the program.
-	'----------------------------------------------------------------------
-
-	DIM extra$
-	DIM a%
-	COLOR DARK_RED, LIGHT_GRAY
-
-	errNum% = errNum% + 1
-	IF errNum% <= 6 THEN
-		IF LEN(errorMsg$) > 67 THEN
-			ChopString(errorMsg$, extra$, 67)
-			errors$(errNum%) = errorMsg$
-			errNum% = errNum% + 1
-			errors$(errNum%) = extra$
-		ELSE
-			errors$(errNum%) = errorMsg$
-		END IF
-	ELSE
-		IF LEN(errorMsg$) > 67 THEN
-			FOR a% = 1 TO 4
-				errors$(a%) = errors$(a% + 1)
-			NEXT a%
-			ChopString(errorMsg$, extra$, 67)
-			errors$(5) = errorMsg$
-			errNum% = errNum% + 1
-			errors$(6) = extra$
-		ELSE
-			FOR a% = 1 TO 5
-				errors$(a%) = errors$(a% + 1)
-			NEXT a%
-			errors$(6) = errorMsg$
-		END IF
-	END IF
-
-	FOR a% = 1 TO 6
-		LOCATE 10 + a%, 7
-		PRINT errors$(a%) + STRING$(67 - LEN(errors$(a%)), 32)
-	NEXT a%
-
-	IF errNum% >= 6 AND INSTR(errorMsg$, "Warning") < 1 AND INSTR(errorMsg$, "Parse of") < 1 AND priority% = 0 THEN
-		PrintStatus ("Too many errors in " + ReverseCutAtDelimit$(COMMAND$, LEN(COMMAND$), "\") + ". Aborting...")
-		MakeExit
-	END IF
-
-	IF priority% > 0 THEN
-		PrintStatus ("Fatal Error in " + ReverseCutAtDelimit$(COMMAND$, LEN(COMMAND$), "\") + ". Unable to continue parse.")
-		MakeExit
-	END IF
-
-END SUB
-
-SUB PrintStatus (stat$)
-
-	'----------------------------------------------------------------------
-	' This sub prints strings to the status bar of the API.
-	'----------------------------------------------------------------------
-
-	COLOR BLACK, DARK_CYAN
-	LOCATE 23, 2
-	PRINT stat$ + SPACE$(70 - LEN(stat$))
-
-END SUB
-
-SUB ReadFileData
-
-	'----------------------------------------------------------------------
-	' This sub opens the data.dat file and stores the contained data in
-	' several global arrays.
-	'----------------------------------------------------------------------
-
-	DIM x%
-	DIM a%
-	DIM vParamNum%
-	DIM codeWord$
-	DIM numSymTypes%
-	DIM numSymExts%
-	DIM numMessages%
-	DIM numVerbs%
-
-	OPEN "data.dat" FOR INPUT AS #1
-	IF EOF(1) THEN
-		CLOSE #1
-		PrintError(1, "Failed to read file: data.dat")
-	END IF
-
-	numSymExts% = 0
-	numVerbs% = 0
-	numSymTypes% = 0
-	numMessages% = 0
-
-	DO WHILE NOT EOF(1)
-		LINE INPUT #1, codeLine$
-		codeLine$ = LCASE$(codeLine$)
-
-		IF NextCharInLine$(codeLine$, 1) <> "#" THEN
-			IF RIGHT$(codeLine$, 1) = ":" THEN
-				section$ = codeLine$
-			ELSE
-				IF section$ = "extensions:" THEN
-					numSymExts% = numSymExts% + 1
-					symExt$(numSymExts%) = codeLine$
-
-				ELSEIF section$ = "types:" THEN
-					numSymTypes% = numSymTypes% + 1
-					symType$(numSymTypes%) = codeLine$
-
-				ELSEIF section$ = "messages:" THEN
-					numMessages% = numMessages% + 1
-					message$(numMessages%) = codeLine$
-
-				ELSEIF section$ = "settings:" THEN      'Settings must be read before verbs.
-					x% = 1
-					codeWord$ = CutAtNextDelimit$(codeLine$, x%, "=")
-					x% = x% + 1
-					value$ = CutAtNextDelimit$(codeLine$, x%, "#")
-
-					IF codeWord$ = "ai" THEN
-						aisub$ = value$
-					ELSEIF codeWord$ = "cog" THEN
-						cogsub$ = value$
-					ELSEIF codeWord$ = "flex" THEN
-						flexsub$ = value$
-					ELSEIF codeWord$ = "float" THEN
-						floatsub$ = value$
-					ELSEIF codeWord$ = "int" THEN
-						intsub$ = value$
-					ELSEIF codeWord$ = "keyframe" THEN
-						keyframesub$ = value$
-					ELSEIF codeWord$ = "material" THEN
-						materialsub$ = value$
-					ELSEIF codeWord$ = "message" THEN
-						messagesub$ = value$
-					ELSEIF codeWord$ = "model" THEN
-						modelsub$ = value$
-					ELSEIF codeWord$ = "sector" THEN
-						sectorsub$ = value$
-					ELSEIF codeWord$ = "sound" THEN
-						soundsub$ = value$
-					ELSEIF codeWord$ = "surface" THEN
-						surfacesub$ = value$
-					ELSEIF codeWord$ = "template" THEN
-						templatesub$ = value$
-					ELSEIF codeWord$ = "thing" THEN
-						thingsub$ = value$
-					ELSEIF codeWord$ = "vector" THEN
-						vectorsub$ = value$
-					ELSEIF codeWord$ = "allow_bad_flexes" THEN
-						allowBadFlex% = VAL(value$)
-					ELSEIF codeWord$ = "strict_parse" THEN
-						strictParse% = VAL(value$)
-					ELSEIF codeWord$ = "sim_array_names" THEN
-						simArrayNames% = VAL(value$)
-					END IF
-
-				ELSEIF section$ = "verbs:" THEN
-					numVerbs% = numVerbs% + 1
-					x% = 1
-					verbName$(numVerbs%) = CutAtNextDelimit$(codeLine$, x%, " ")
-					verbAct%(numVerbs%) = VAL(CutAtNextDelimit$(codeLine$, x%, " "))
-					verbRet$(numVerbs%) = SubType$(CutAtNextDelimit$(codeLine$, x%, " "))
-					verbParNum$(numVerbs%) = CutAtNextDelimit$(codeLine$, x%, " #")
-					vParamNum% = VAL(verbParNum$(numVerbs%))
-					FOR a% = 1 TO vParamNum%
-						verbParam$(numVerbs%, a%) = SubType$(CutAtNextDelimit$(codeLine$, x%, " #"))
-					NEXT a%
-				END IF
-			END IF
-		END IF
-	LOOP
-	CLOSE #1
-
-END SUB
-
-FUNCTION ReverseCutAtDelimit$ (codeLine$, x%, del$)
-
-	'This function does not feature the
-	'intuitive delimiter-guessing that
-	'the original CAND has.
-
-	DIM lastBreak%
-	lastBreak% = x%
-	
-	' FreeBASIC migration - Use local iterator variable to avoid "error 51: Expected scalar counter..."
-	DIM itr%
-	FOR itr% = x% TO 1 STEP -1
-		x% = itr%
-		IF INSTR(del$, MID$(codeLine$, x%, 1)) > 0 THEN EXIT FOR
-	NEXT itr%
-	x% = itr%
-
-	ReverseCutAtDelimit$ = LCASE$(Trim$(MID$(codeLine$, x% + 1, lastBreak%)))
-
-END FUNCTION
-
-SUB SkipComments
-
-	DIM nextChar$
-
-	DO WHILE NOT EOF(1)
-		LINE INPUT #1, codeLine$
-		codeLine$ = LCASE$(Trim$(codeLine$))
-		lineNum% = lineNum% + 1
-		nextChar$ = NextCharInLine$(codeLine$, 1)
-		IF nextChar$ = "#" OR LEN(nextChar$) < 1 THEN
-			'trap
-		ELSEIF nextChar$ = "/" THEN
-			PrintError(0, "Garbage found on line" + STR$(lineNum%) + ". Double-slash comments are not allowed.")
-		ELSE
-			EXIT DO
-		END IF
-	LOOP
-
-END SUB
-
 FUNCTION SubType$ (theType$)
 
 	IF theType$ = "ai" THEN
@@ -2220,25 +2211,36 @@ FUNCTION Trim$ (tString$)
 
 END FUNCTION
 
-SUB UpdateBar
+FUNCTION CharNum% (codeLine$, char$)
+
+	DIM x%
+	DIM count%
+	count% = 0
+
+	FOR x% = 1 TO LEN(codeLine$)
+		IF MID$(codeLine$, x%, 1) = char$ THEN count% = count% + 1
+	NEXT x%
+
+	CharNum% = count%
+
+END FUNCTION
+
+FUNCTION InStringArray% (sArray$(), sValue$)
 
 	'----------------------------------------------------------------------
-	' This sub draws the green bar graph to show how far through the cog
-	' Parsec has gone.
+	' This function was created to search a string array for a certain
+	' value. This avoids having too much array-searching code.
 	'----------------------------------------------------------------------
 
-	DIM percent%    'percent is not scaled 0 - 100, but 0 - 48
-	DIM ratio!
 	DIM a%
-
-	ratio! = 48 / numLines%
-	percent% = CINT(lineNum% * ratio!)
-
-	COLOR DARK_GREEN, LIGHT_GRAY
-	FOR a% = 1 TO percent%
-		LOCATE 5, 16 + a%
-		PRINT CHR$(219)
+	FOR a% = 1 TO UBOUND(sArray$, 1)
+		IF sValue$ = sArray$(a%) THEN
+			InStringArray% = a%
+			EXIT FUNCTION
+		END IF
 	NEXT a%
 
-END SUB
+	InStringArray% = 0
+
+END FUNCTION
 
