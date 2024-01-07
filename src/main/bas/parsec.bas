@@ -23,6 +23,9 @@ CONST LIGHT_MAGENTA = 13
 CONST LIGHT_YELLOW = 14
 CONST WHITE = 15
 
+'The tab ('\t') character
+CONST CHR_TAB = CHR$(9)
+
 '----------------------- API Subs ---------------------------------------------
 DECLARE SUB CreateAPI ()
 DECLARE SUB MakeExit ()
@@ -918,7 +921,7 @@ SUB GetToNextChar (codeLine$, x%)
 	FOR itr% = x% TO LEN(codeLine$)
 		x% = itr%
 		char$ = MID$(codeLine$, x%, 1)
-		IF char$ <> " " AND char$ <> CHR$(9) THEN EXIT FOR
+		IF char$ <> " " AND char$ <> CHR_TAB THEN EXIT FOR
 	NEXT itr%
 	x% = itr%
 
@@ -945,7 +948,7 @@ SUB GetToNextDelimit (codeLine$, x%, del$)
 		x% = itr%
 		char$ = MID$(codeLine$, x%, 1)
 		IF INSTR(del$, char$) > 0 THEN EXIT FOR
-		IF INSTR(del$, " ") > 0 AND char$ = CHR$(9) THEN EXIT FOR
+		IF INSTR(del$, " ") > 0 AND char$ = CHR_TAB THEN EXIT FOR
 	NEXT itr%
 	x% = itr%
 
@@ -954,11 +957,12 @@ END SUB
 FUNCTION CutAtNextDelimit$ (codeLine$, x%, del$)
 
 	'----------------------------------------------------------------------
-	' This is a main parsing function designed to "cut" a codeWord out out
+	' This is a main parsing function designed to "cut" a codeWord out
 	' of a string. First it gets to the next non-space character. Then, it
 	' gets to the next character in the string that's in the del$ string.
 	' The characters between these two points will be returned as the
-	' codeWord.
+	' codeWord. If a space character is in the del$ string, then both
+	' spaces and tabs will be treated as delimiter characters.
 	'----------------------------------------------------------------------
 
 	DIM lastBreak%
@@ -978,7 +982,7 @@ FUNCTION CutAtNextDelimit$ (codeLine$, x%, del$)
 			IF CharNum%(del$, "/") = 1 OR CharNum%(del$, "/") > 2 THEN EXIT FOR
 		ELSEIF INSTR(del$, char$) > 0 THEN
 			EXIT FOR
-		ELSEIF INSTR(del$, " ") > 0 AND char$ = CHR$(9) THEN
+		ELSEIF INSTR(del$, " ") > 0 AND char$ = CHR_TAB THEN
 			EXIT FOR
 		END IF
 	NEXT itr%
@@ -1052,7 +1056,7 @@ FUNCTION CheckForBlankLine% (codeLine$, startPos%)
 
 	FOR x% = startPos% TO LEN(codeLine$)
 		char$ = MID$(codeLine$, x%, 1)
-		IF char$ <> " " AND char$ <> CHR$(9) THEN
+		IF char$ <> " " AND char$ <> CHR_TAB THEN
 			IF char$ = "#" OR MID$(codeLine$, x%, 2) = "//" THEN
 				EXIT FOR
 			ELSE
@@ -1907,7 +1911,7 @@ END SUB
 SUB FindNextChar (codeLine$, x%, multiLine%)
 
 	'----------------------------------------------------------------------
-	' FindNextChar is called when the next a sub needs the position of the
+	' FindNextChar is called when a sub needs the position of the
 	' next character in the code section. This sub will go through multiple
 	' lines looking for the next char unlike other one-line-only parsing
 	' subs.
@@ -2196,13 +2200,13 @@ FUNCTION Trim$ (tString$)
 	DIM char$
 
 	char$ = LEFT$(tString$, 1)
-	DO WHILE char$ = " " OR char$ = CHR$(9)
+	DO WHILE char$ = " " OR char$ = CHR_TAB
 		tString$ = RIGHT$(tString$, LEN(tString$) - 1)
 		char$ = LEFT$(tString$, 1)
 	LOOP
 
 	char$ = RIGHT$(tString$, 1)
-	DO WHILE char$ = " " OR char$ = CHR$(9)
+	DO WHILE char$ = " " OR char$ = CHR_TAB
 		tString$ = LEFT$(tString$, LEN(tString$) - 1)
 		char$ = RIGHT$(tString$, 1)
 	LOOP
@@ -2212,6 +2216,10 @@ FUNCTION Trim$ (tString$)
 END FUNCTION
 
 FUNCTION CharNum% (codeLine$, char$)
+
+	'----------------------------------------------------------------------
+	' Count the number of occurrences of char$ found in codeLine$
+	'----------------------------------------------------------------------
 
 	DIM x%
 	DIM count%
