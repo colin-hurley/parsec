@@ -442,6 +442,7 @@ SUB ReadFileData
 	' several global arrays.
 	'----------------------------------------------------------------------
 
+	DIM dataFile$
 	DIM x%
 	DIM a%
 	DIM vParamNum%
@@ -451,10 +452,12 @@ SUB ReadFileData
 	DIM numMessages%
 	DIM numVerbs%
 
-	OPEN "data.dat" FOR INPUT AS #1
+	dataFile$ = __EXEPATH() + "\data.dat"
+
+	OPEN dataFile$ FOR INPUT AS #1
 	IF EOF(1) THEN
 		CLOSE #1
-		PrintError(1, "Failed to read file: data.dat")
+		PrintError(1, "Failed to read file: " + dataFile$)
 	END IF
 
 	numSymExts% = 0
