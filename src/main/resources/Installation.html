@@ -15,9 +15,17 @@
 </HEAD>
 <BODY>
 
-<H2 style="margin-bottom:0">Parsec Installation</H2>
-<H4 style="margin:0" align=center>version 1.7.0</H4>
-<HR>
+<H2 style="margin-bottom:0">Parsec</H2>
+<H4 style="margin:0" align=center>version 1.8.0</H4>
+
+<HR><H3 style="margin-top:0">Credits</H3>
+
+<UL>
+<LI><A href="mailto:sabermastery@yahoo.com">SaberMaster</A>, the original author of Parsec
+<LI><A href="mailto:darthslaw@gmail.com">darthslaw</A>, maintainer of this Parsec fork
+</UL>
+
+<HR><H3 style="margin-top:0">Installation</H3>
 
 The .zip should include:
 <UL>
@@ -29,13 +37,8 @@ The .zip should include:
 
 First, extract all of the files in the zip to the directory that you want to store Parsec in.
 <P>
-Now right-click Parsec and select <EM>Properties</EM>. Then click the <EM>Program</EM> tab. You should see where to enter a
-<EM>CMD line</EM> and <EM>Working</EM> path. Windows should already have Parsec's path as the <EM>CMD line</EM>, but you will
-need to manually enter Parsec's directory for the <EM>Working</EM> directory. Without the <EM>Working</EM> dir, Parsec will not be
-able to find its data file.
-<P>
 The preferred way to open cogscripts with Parsec is to add a link to Parsec in the right-click menu of .cog files. But you can use any
-method that sends the DOS path of the cog to Parsec on the command line. General instructions for all Windows operating systems
+method that sends the path of the cog to Parsec on the command line. General instructions for all Windows operating systems
 are given below.
 
 <BLOCKQUOTE>
@@ -49,11 +52,47 @@ are given below.
 	see a link to Parsec in the menu.
 </BLOCKQUOTE>
 
-All right, Parsec should now be configured. Enjoy using it. If you find an error with Parsec or something that needs to be improved,
+All right, Parsec installation is now complete. Enjoy using it. If you find an error with Parsec or something that needs to be improved,
 email me. Feedback is appreciated.
+
+<HR><H3 style="margin-top:0">Configuration</H3>
+
+The data.dat file that Parsec uses contains all of the data that Parsec needs to parse a cogscript. The first data category in this file,
+<EM>settings:</EM>, is the important one for the user. Open the file and read the comments to understand how to use the settings.
+
+<HR><H3 style="margin-top:0">Source Code</H3>
+
+The source code for Parsec is hosted <A href="https://github.com/colin-hurley/parsec">on Github</A>.
+A copy of the source code is also included in the .zip should anyone want to see how Parsec works or even update it.
+Suggestions are welcome.
 <P>
-- <A href="mailto:sabermastery@yahoo.com">SaberMaster</A>.
-<HR><H3 style="margin-top:0">What's New</H3>
+Parsec was originally written with QuickBasic 7.1 - AKA PDS Basic and QuickBasic Extended.
+<P>
+The source was migrated to FreeBASIC for the Parsec 1.8.0 release.
+This was done to simplify maintenance effort and improve compatibility with modern systems.
+
+<HR><H3 style="margin-top:0">Release Notes</H3>
+
+<H5>Parsec 1.8.0</H5>
+
+<H6>Improvements</H6>
+<UL>
+<LI>Add recognition of <EM>goto</EM> keyword.
+<LI>Allow <EM>cog</EM> variables to be assigned an initial value in the <EM>symbols</EM> section.
+<LI>Increase the number of verb definitions that may be loaded from <EM>data.dat</EM>.
+</UL>
+
+<H6>Migration to FreeBASIC</H6>
+Parsec is now built with FreeBASIC instead of QuickBASIC.
+FreeBASIC provides good support for the QuickBASIC dialect, so only minor code adjustments were needed for the migration.
+<P>
+The migration to FreeBASIC addresses several concerns, including:
+<UL>
+<LI>Earlier versions of Parsec cannot run on modern systems without a DOS-like environment, such as <A href="https://www.dosbox.com/">DOSBox</A>.
+<LI>The QuickBASIC compiler used to build Parsec also cannot run on modern systems without a DOS-like environment.
+<LI>16-bit DOS applications are also subject to various other limitations, such as <A href="https://en.wikipedia.org/wiki/8.3_filename">8.3 short file names</A> and maximum memory.
+<LI>FreeBASIC is being actively developed and provides additional language features and functions that can be used to make Parsec even better.
+</UL>
 
 <H5>Parsec 1.7.0</H5>
 
@@ -85,13 +124,4 @@ out of string memory. Parsec 1.5 has no size limitations. Version 1.5 also featu
 In Version 1.3, Parsec is allocated more stack memory. Earlier versions would be limited to less complex code block
 structures because of this shortage of stack space. Also, Parsec 1.3 includes an updated data file.
 
-<HR><H3 style="margin-top:0">Parsec Settings</H3>
-
-The data.dat file that Parsec uses contains all of the data that Parsec needs to parse a cogscript. The first data category in this file,
-<EM>settings:</EM>, is the important one for the user. Open the file and read the comments to understand how to use the settings.
-
-<HR><H3 style="margin-top:0">The Source Code</H3>
-
-Parsec was written with QuickBasic 7.1 - AKA PDS Basic and QuickBasic Extended. Parsec's source code is included in the .zip
-should anyone want to see how Parsec works or even update it. Suggestions are welcome.
 <HR></BODY></HTML>
