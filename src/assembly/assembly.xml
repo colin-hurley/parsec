@@ -7,15 +7,7 @@
 	<fileSets>
 		<fileSet>
 			<outputDirectory>\</outputDirectory>
-			<directory>${project.basedir}\src\main\resources</directory>
+			<directory>${project.build.outputDirectory}</directory>
 		</fileSet>
 	</fileSets>
-	<files>
-		<file>
-			<!-- Preserve original filename case (Parsec.exe instead of parsec.exe) -->
-			<outputDirectory>\</outputDirectory>
-			<destName>Parsec.exe</destName>
-			<source>${project.build.outputDirectory}\parsec.exe</source>
-		</file>
-	</files>
 </assembly>
