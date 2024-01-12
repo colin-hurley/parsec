@@ -1,127 +1,194 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<HTML><HEAD><TITLE>Parsec</TITLE>
-	<STYLE>
-		BODY {background:silver; font: 10pt Verdana}
-		H2 {text-align:center}
-		H3 {text-align:center}
-		H5 {background: gray; font: bold 12px Verdana; border: 1; border-color: black; width: 150; padding: 2; padding-left: 20;}
-		EM {color:#700; font-style:normal}
-		A:link {color:#060}
-		A:hover {color:#080}
-		A:active {color:#060}
-		A:visited {color:#060}
-		PRE.code {font:10pt Arial; color:green; padding-left:20; margin-top:10}
-	</STYLE>
-</HEAD>
-<BODY>
+<html>
+<head>
+	<title>Parsec</title>
+	<style>
+		body {
+			background: silver;
+			font: 10pt Verdana;
+		}
+		h2 {
+			margin-bottom: 0px;
+			text-align: center;
+		}
+		h3 {
+			margin-top: 0px;
+			text-align: center;
+		}
+		h4 {
+			margin: 0px;
+			text-align: center;
+		}
+		h5 {
+			background: gray;
+			border-color: black;
+			border-style: solid;
+			border-width: 1px;
+			font: bold 12px Verdana;
+			padding: 2px;
+			padding-left: 20px;
+			width: 150px;
+		}
+		em {
+			color: #700;
+			font-style: normal;
+		}
+		a:link {
+			color: #060;
+		}
+		a:hover {
+			color: #080;
+		}
+		a:active {
+			color: #060;
+		}
+		a:visited {
+			color: #060;
+		}
+		pre.code {
+			color: green;
+			font: 10pt Arial;
+			margin-top: 10px;
+			padding-left: 20px;
+		}
+	</style>
+</head>
+<body>
 
-<H2 style="margin-bottom:0">Parsec</H2>
-<H4 style="margin:0" align=center>version 1.8.0</H4>
+<h2>Parsec</h2>
+<h4>version 1.8.0</h4>
 
-<HR><H3 style="margin-top:0">Credits</H3>
+<hr>
+<h3>Credits</h3>
 
-<UL>
-<LI><A href="mailto:sabermastery@yahoo.com">SaberMaster</A>, the original author of Parsec
-<LI><A href="mailto:darthslaw@gmail.com">darthslaw</A>, maintainer of this Parsec fork
-</UL>
+<ul>
+<li><a href="mailto:sabermastery@yahoo.com">SaberMaster</a>, the original author of Parsec
+<li><a href="mailto:darthslaw@gmail.com">darthslaw</a>, maintainer of this Parsec fork
+</ul>
 
-<HR><H3 style="margin-top:0">Installation</H3>
+<hr>
+<h3>Installation</h3>
 
 The .zip should include:
-<UL>
-<LI>parsec.bas
-<LI>parsec.exe
-<LI>data.dat
-<LI>readme.html
-</UL>
+<ul>
+<li>parsec.bas
+<li>parsec.exe
+<li>data.dat
+<li>readme.html
+</ul>
 
 First, extract all of the files in the zip to the directory that you want to store Parsec in.
-<P>
-The preferred way to open cogscripts with Parsec is to add a link to Parsec in the right-click menu of .cog files. But you can use any
-method that sends the path of the cog to Parsec on the command line. General instructions for all Windows operating systems
-are given below.
 
-<BLOCKQUOTE>
-	Go to the Control Panel and open <EM>Folder Options</EM>. In the dialogue box that appears, select the <EM>File Types</EM> tab.
-	Find the file type for .cog files. If it's not there, create it. In whatever way is provided, view the <EM>Advanced</EM> settings for
-	the file type. You should see a box listing the actions that can be performed on cog files (such as <EM>open</EM>).
-	<P>
-	Create a new action called <EM>Parsec</EM> and give the path for the Parsec exe in the text box for the Application's path. Directly
-	after Parsec's path, add <EM>%1</EM> - without quotation marks (Windows may add the <EM>%1</EM> automatically when you
-	accept the settings). That's all you have to enter for the action settings. Now, when you right click on a cogscript file, you should
-	see a link to Parsec in the menu.
-</BLOCKQUOTE>
+<p>
+The preferred way to open cogscripts with Parsec is to add a link to Parsec in the right-click menu of .cog files.
+But you can use any method that sends the path of the cog to Parsec on the command line.
+General instructions for all Windows operating systems are given below.
 
-All right, Parsec installation is now complete. Enjoy using it. If you find an error with Parsec or something that needs to be improved,
-email me. Feedback is appreciated.
+<blockquote>
+	Go to the Control Panel and open <em>Folder Options</em>.
+	In the dialogue box that appears, select the <em>File Types</em> tab.
+	Find the file type for .cog files.
+	If it's not there, create it.
+	In whatever way is provided, view the <em>Advanced</em> settings for the file type.
+	You should see a box listing the actions that can be performed on cog files (such as <em>open</em>).
+	<p>
+	Create a new action called <em>Parsec</em> and give the path for the Parsec exe in the text box for the Application's path.
+	Directly after Parsec's path, add <em>%1</em> - without quotation marks (Windows may add the <em>%1</em> automatically when you accept the settings).
+	That's all you have to enter for the action settings.
+	Now, when you right click on a cogscript file, you should see a link to Parsec in the menu.
+</blockquote>
 
-<HR><H3 style="margin-top:0">Configuration</H3>
+All right, Parsec installation is now complete.
+Enjoy using it.
+If you find an error with Parsec or something that needs to be improved, email me.
+Feedback is appreciated.
 
-The data.dat file that Parsec uses contains all of the data that Parsec needs to parse a cogscript. The first data category in this file,
-<EM>settings:</EM>, is the important one for the user. Open the file and read the comments to understand how to use the settings.
+<hr>
+<h3>Configuration</h3>
 
-<HR><H3 style="margin-top:0">Source Code</H3>
+The data.dat file that Parsec uses contains all of the data that Parsec needs to parse a cogscript.
+The first data category in this file, <em>settings:</em>, is the important one for the user.
+Open the file and read the comments to understand how to use the settings.
 
-The source code for Parsec is hosted <A href="https://github.com/colin-hurley/parsec">on Github</A>.
+<hr>
+<h3>Source Code</h3>
+
+The source code for Parsec is hosted <a href="https://github.com/colin-hurley/parsec">on Github</a>.
 A copy of the source code is also included in the .zip should anyone want to see how Parsec works or even update it.
 Suggestions are welcome.
-<P>
+
+<p>
 Parsec was originally written with QuickBasic 7.1 - AKA PDS Basic and QuickBasic Extended.
-<P>
+
+<p>
 The source was migrated to FreeBASIC for the Parsec 1.8.0 release.
 This was done to simplify maintenance effort and improve compatibility with modern systems.
 
-<HR><H3 style="margin-top:0">Release Notes</H3>
+<hr>
+<h3>Release Notes</h3>
 
-<H5>Parsec 1.8.0</H5>
+<h5>Parsec 1.8.0</h5>
 
-<H6>Improvements</H6>
-<UL>
-<LI>Add recognition of <EM>goto</EM> keyword.
-<LI>Allow <EM>cog</EM> variables to be assigned an initial value in the <EM>symbols</EM> section.
-<LI>Increase the number of verb definitions that may be loaded from <EM>data.dat</EM>.
-</UL>
+<h6>Improvements</h6>
 
-<H6>Migration to FreeBASIC</H6>
+<ul>
+<li>Add recognition of <em>goto</em> keyword.
+<li>Allow <em>cog</em> variables to be assigned an initial value in the <em>symbols</em> section.
+<li>Increase the number of verb definitions that may be loaded from <em>data.dat</em>.
+</ul>
+
+<h6>Migration to FreeBASIC</h6>
+
 Parsec is now built with FreeBASIC instead of QuickBASIC.
 FreeBASIC provides good support for the QuickBASIC dialect, so only minor code adjustments were needed for the migration.
-<P>
-The migration to FreeBASIC addresses several concerns, including:
-<UL>
-<LI>Earlier versions of Parsec cannot run on modern systems without a DOS-like environment, such as <A href="https://www.dosbox.com/">DOSBox</A>.
-<LI>The QuickBASIC compiler used to build Parsec also cannot run on modern systems without a DOS-like environment.
-<LI>16-bit DOS applications are also subject to various other limitations, such as <A href="https://en.wikipedia.org/wiki/8.3_filename">8.3 short file names</A> and maximum memory.
-<LI>FreeBASIC is being actively developed and provides additional language features and functions that can be used to make Parsec even better.
-</UL>
 
-<H5>Parsec 1.7.0</H5>
+<p>
+The migration to FreeBASIC addresses several concerns, including:
+
+<ul>
+<li>Earlier versions of Parsec cannot run on modern systems without a DOS-like environment, such as <a href="https://www.dosbox.com/">DOSBox</a>.
+<li>The QuickBASIC compiler used to build Parsec also cannot run on modern systems without a DOS-like environment.
+<li>16-bit DOS applications are also subject to various other limitations, such as <a href="https://en.wikipedia.org/wiki/8.3_filename">8.3 short file names</a> and maximum memory.
+<li>FreeBASIC is being actively developed and provides additional language features and functions that can be used to make Parsec even better.
+</ul>
+
+<h5>Parsec 1.7.0</h5>
 
 Parsec 1.7.0 has an updated data file with new parameter information from version 0.5.0 of the DataMaster.
-This new version of Parsec also has many minor parsing and error-reporting improvements over previous
-versions as well as support for the complete for loop syntax:
-<PRE class="code">
+This new version of Parsec also has many minor parsing and error-reporting improvements over previous versions as well as support for the complete for loop syntax:
+
+<pre class="code">
 for([statement1[, statement1]]; [condition]; statement2[, statement2]) // optional code
-</PRE>
-<P>
-This version will likely be the final release of Parsec. Almost all of its bugs have been fixed, but aside from that, I
-want to rewrite the parser. Parsec was originally written with no model and then I had no experience with writing
-text parsers. But now that Parsec has matured, I will rewrite it in a more advanced language.
+</pre>
 
-<H5>Parsec 1.6</H5>
-Two new options, strict_parse and sim_array_names, have been added. strict_parse tells Parsec whether or not to allow
-statements to span multiple lines. sim_array_names tells Parsec that you intend to use similar array names - such as
-red0 and red1. Knowing this, Parsec can search for unused variables. If you don't use similar array names and arrays
-are used in your cog, then Parsec will not check for unused variables.
-<P>
+<p>
+This version will likely be the final release of Parsec.
+Almost all of its bugs have been fixed, but aside from that, I want to rewrite the parser.
+Parsec was originally written with no model and then I had no experience with writing text parsers.
+But now that Parsec has matured, I will rewrite it in a more advanced language.
+
+<h5>Parsec 1.6</h5>
+Two new options, strict_parse and sim_array_names, have been added.
+strict_parse tells Parsec whether or not to allow statements to span multiple lines.
+sim_array_names tells Parsec that you intend to use similar array names - such as red0 and red1.
+Knowing this, Parsec can search for unused variables.
+If you don't use similar array names and arrays are used in your cog, then Parsec will not check for unused variables.
+
+<p>
 Parsec now recognizes which variables have been assigned, and which variables have been used in the code section.
-If a variable was assigned but not used, if it was used but never assigned, or if it was not used at all, Parsec will give
-an appropriate error message explaining the problem.
-<H5>Parsec 1.5</H5>
-Earlier versions of Parsec needed to load an entire cogscript into memory to parse it. In version 1.5, Parsec reads one line at a time
-from the cog file, parses it, and then reads the next line. Before 1.5, Parsec could only load a cog less than 700 lines or it would run
-out of string memory. Parsec 1.5 has no size limitations. Version 1.5 also features various minor improvements.
-<H5>Parsec 1.3</H5>
-In Version 1.3, Parsec is allocated more stack memory. Earlier versions would be limited to less complex code block
-structures because of this shortage of stack space. Also, Parsec 1.3 includes an updated data file.
+If a variable was assigned but not used, if it was used but never assigned, or if it was not used at all, Parsec will give an appropriate error message explaining the problem.
 
-<HR></BODY></HTML>
+<h5>Parsec 1.5</h5>
+Earlier versions of Parsec needed to load an entire cogscript into memory to parse it.
+In version 1.5, Parsec reads one line at a time from the cog file, parses it, and then reads the next line.
+Before 1.5, Parsec could only load a cog less than 700 lines or it would run out of string memory.
+Parsec 1.5 has no size limitations.
+Version 1.5 also features various minor improvements.
+
+<h5>Parsec 1.3</h5>
+In Version 1.3, Parsec is allocated more stack memory.
+Earlier versions would be limited to less complex code block structures because of this shortage of stack space.
+Also, Parsec 1.3 includes an updated data file.
+
+<hr>
+</body>
+</html>
