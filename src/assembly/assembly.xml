@@ -7,10 +7,6 @@
 	<fileSets>
 		<fileSet>
 			<outputDirectory>\</outputDirectory>
-			<directory>${project.basedir}\src\main\bas</directory>
-		</fileSet>
-		<fileSet>
-			<outputDirectory>\</outputDirectory>
 			<directory>${project.basedir}\src\main\resources</directory>
 		</fileSet>
 	</fileSets>
