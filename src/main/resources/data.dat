@@ -1,4 +1,4 @@
-# Parsec 1.7.0 data file
+# Parsec 1.8.0 data file
 #
 # This file contains the data needed to correctly parse cogscripts.
 # Blank lines in this file are not allowed. Also, do not add extra spaces
@@ -162,7 +162,7 @@ getsurfaceanim		0	int		1 surface
 getsurfacecel		0	int		1 surface
 getwallcel		0	int		1 surface
 setsurfacecel		1	void		2 surface int
-setwallcel		1	void		2 surface int
+setwallcel		1	int		2 surface int
 stopsurfaceanim		1	void		1 surface
 surfaceanim		1	int		3 surface int int
 slideceilingsky		1	int		2 flex flex
@@ -335,7 +335,7 @@ jkprintunistring	1	void		2 int int
 jkstringclear		1	void		0
 jkstringconcatasciistring	1	void		1 string
 jkstringconcatflex		1	void		1 flex
-jkstringconcatformattedflex	1	!		0
+jkstringconcatformattedflex	1	void		2 flex string
 jkstringconcatformattedint	1	void		2 int string
 jkstringconcatint		1	void		1 int
 jkstringconcatplayername	1	void		1 thing
@@ -443,7 +443,7 @@ getmastercog		0	cog		0
 getselfcog		0	cog		0
 heapfree		1	void		0
 heapget			0	flex		1 int
-heapnew			1	int		2 int int
+heapnew			1	void		1 int
 heapset			1	void		2 int flex
 loadkeyframe		0	keframe		1 string
 loadmodel		0	model		1 string
@@ -541,7 +541,7 @@ setthingcollidesize	1	void		2 thing flex
 setthingfireoffset	1	void		2 thing vector
 setthinglight		1	void		3 thing flex flex
 setthingmass		1	void		2 thing flex
-setthingmodel		1	void		2 thing model
+setthingmodel		1	model		2 thing model
 setthingmovesize	1	void		2 thing flex
 setthingpos		1	void		2 thing vector
 setthingtype		1	void		2 thing int
