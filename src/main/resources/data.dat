@@ -161,7 +161,7 @@ setmaterialcel		1	void		2 material int
 getsurfaceanim		0	int		1 surface
 getsurfacecel		0	int		1 surface
 getwallcel		0	int		1 surface
-setsurfacecel		1	void		2 surface int
+setsurfacecel		1	int		2 surface int
 setwallcel		1	int		2 surface int
 stopsurfaceanim		1	void		1 surface
 surfaceanim		1	int		3 surface int int
