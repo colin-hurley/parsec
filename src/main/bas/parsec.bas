@@ -114,6 +114,9 @@ REM $DYNAMIC
 ' allocation; otherwise, code 14 (out of string space) will be thrown.
 ' This is the case in QuickBASIC at least. Need to confirm whether or not this
 ' happens with FreeBASIC as well.
+' Update (May 2024): I increased the size of some of the arrays that
+' hold symbol information and Parsec still works. Having more symbols
+' in a cog than Parsec can fit in the array causes Parsec to crash.
 DIM SHARED symType$(1 TO 30)
 DIM SHARED symExt$(1 TO 10)
 DIM SHARED message$(1 TO 100)
@@ -122,11 +125,11 @@ DIM SHARED verbAct%(1 TO 601)
 DIM SHARED verbRet$(1 TO 601)
 DIM SHARED verbParNum$(1 TO 601)
 DIM SHARED verbParam$(1 TO 601, 1 TO 11)
-DIM SHARED varName$(1 TO 200)
-DIM SHARED varConst$(1 TO 200)
-DIM SHARED varType$(1 TO 200)
-DIM SHARED usedVar$(1 TO 200)
-DIM SHARED assignVar$(1 TO 200)
+DIM SHARED varName$(1 TO 512)
+DIM SHARED varConst$(1 TO 512)
+DIM SHARED varType$(1 TO 512)
+DIM SHARED usedVar$(1 TO 512)
+DIM SHARED assignVar$(1 TO 512)
 DIM SHARED arrayVar$(1 TO 100)
 DIM SHARED CallMessage$(1 TO 100)
 DIM SHARED CodeMessage$(1 TO 100)
