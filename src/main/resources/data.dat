@@ -543,7 +543,7 @@ setthinglight		1	void		3 thing flex flex
 setthingmass		1	void		2 thing flex
 setthingmodel		1	model		2 thing model
 setthingmovesize	1	void		2 thing flex
-setthingpos		1	void		2 thing vector
+setthingpos		1	int		2 thing vector
 setthingtype		1	void		2 thing int
 setthinguserdata	1	void		2 thing flex
 thinglight		1	void		3 thing flex flex
