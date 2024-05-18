@@ -299,7 +299,7 @@ pickupbackpack		1	void		2 thing thing
 setmultimodeflags	1	void		1 int
 setplayerteam		1	void		2 thing int
 setrespawnmask		1	void		2 thing int
-settimelimit		1	void		2 int
+settimelimit		1	void		1 int
 syncscores		1	void		0
 syncsector		1	void		1 sector
 syncsurface		1	void		1 surface
