@@ -244,9 +244,9 @@ getsurfacecount		0	int		0
 getthingcount		0	int		0
 getthingtemplatecount	0	int		0
 jkendlevel		1	void		1 int
-setceilingskyoffset	1	void		2 flex flex
+setceilingskyoffset	1	void		1 vector
 setgravity		1	void		1 flex
-sethorizonskyoffset	1	void		2 flex flex
+sethorizonskyoffset	1	void		1 vector
 getparam		1	flex		1 int
 getsenderid		1	int		0
 getsenderref		1	int		0
